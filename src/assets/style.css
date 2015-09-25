@@ -1,0 +1,164 @@
+@import url(font-awesome.min.css);
+
+body{
+	font-size:16px;
+	line-height:1.6em;
+}
+p{
+	margin: 0 0 1.6em;
+}
+.entry-content .featured-image{
+	margin-bottom:1em;
+}
+
+footer.content-info .widget{
+	background-color: transparent;
+	border-color: transparent;
+}
+footer.content-info .widget ul li{
+	padding: 8px 11px;
+	background-color: #262727;
+	border: 2px solid #282A2B;
+}
+
+.category-sticky{
+	border-style:none !important;
+}
+
+.cta{
+	background-color: #FFC200;
+	margin-top: 2em;
+}
+
+.home #topics .well{
+	min-height: 17em;
+	padding: 10px 19px;
+}
+.navbar a.navbar-brand.logo {
+	padding: 0;
+}
+
+.fa.cat-food:before{
+	content: "\f0f5";
+}
+.fa.cat-finance:before{
+	content: "\f154";
+}
+.fa.cat-business-growth:before{
+	content: "\f135";
+}
+.fa.cat-in-work-poverty:before{
+	content: "\f0b1";
+}
+.fa.cat-child-poverty:before{
+	content: "\f192";
+}
+.fa.cat-access-to-services:before{
+	content: "\f084";
+}
+.fa.cat-fuel:before{
+	content: "\f06d";
+}
+
+.jumbotron{
+	border-radius: 0;
+	-webkit-background-size: contain;
+    background-size: contain;
+}
+
+.jumbotron h1{
+	font-weight: bold;
+	background-color: #FFC200;
+	padding: 0.3em;
+	margin: 0;
+	color: #D33;
+	text-shadow: 0 1px 0 #A81C1C;
+}
+
+.home .main {
+	margin: 3em 0;
+	font-size: 1.2em;
+}
+.row-meta{
+	margin-top:2em;
+	margin-bottom:2em;
+}
+
+/* download links */
+a[href$='.pdf']:before,a[href$='.doc']:before,a[href$='.docx']:before {
+	display: inline-block;
+	font-family: FontAwesome;
+	font-style: normal;
+	font-weight: normal;
+	line-height: 1;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	content: "\f0ed";
+	margin-right: 0.25em;
+}
+
+.ref {
+	vertical-align: baseline;
+	position: relative;
+	top: -0.6em;
+	font-size: 60%;
+}
+
+
+#topics .row {
+	border-top: 2px solid #D33;
+	margin-bottom: 1em;
+	padding-top: 1em;
+}
+
+#topics h3 span.fa {
+	font-size: 3em;
+	vertical-align: top;
+	width: 1em;
+	float: left;
+	margin-right: 0.2em;
+	text-align:center;
+}
+
+.home .featured,
+.highlighted.featured {
+	margin-bottom: 2em;
+	background-color: #eee;
+	padding: 2em;
+}
+.home .featured h2,
+.highlighted.featured h2 {
+	font-size: 110%;
+	margin: 0;
+	color: #666;
+}
+.home .featured .big_thumbnail,
+.highlighted.featured .big_thumbnail {
+	margin-right: 1em;
+	margin-bottom: 1em;
+}
+.home .featured .entry-summary,
+.highlighted.featured .entry-summary {
+	margin-top: 1em;
+}
+.home .featured .event-venue,
+.highlighted.featured .event-venue {
+	font-weight:bold;
+}
+@media (max-width: 600px) {
+	.home .featured .big_thumbnail {
+		width:100px;
+	}
+}
+
+
+/* HACK by Justin Hellings */
+
+.alignleft {
+    margin: 10px 10px 10px 0;
+}
+.alignright {
+    margin: 10px 0 10px 10px;
+}
+
+.

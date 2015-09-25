@@ -1,0 +1,418 @@
+<!-- This line kills CartoDB, so don't uncomment it!!!!!!  <!DOCTYPE html> -->
+
+<html style="" class=" js flexbox canvas canvastext webgl no-touch geolocation postmessage no-websqldatabase indexeddb hashchange history draganddrop websockets rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients no-cssreflections csstransforms csstransforms3d csstransitions fontface generatedcontent video audio localstorage sessionstorage webworkers applicationcache svg inlinesvg smil svgclippaths" prefix="og: http://ogp.me/ns#" lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+  <script src="http://www.gmpag.org/wp-content/themes/shoestrap/assets/js/vendor/html5shiv.js"></script>
+  <script src="http://www.gmpag.org/wp-content/themes/shoestrap/assets/js/vendor/respond.min.js"></script>
+<![endif]-->
+
+<!-- This site is optimized with the Yoast WordPress SEO plugin v1.7.4 - https://yoast.com/wordpress/plugins/seo/ -->
+<meta name="robots" content="noodp,noydir">
+<meta name="description" content="Indicator: The estimated percentage&nbsp;of children living in households on low incomes after&nbsp;housing costs. Overview On average, more than&nbsp;1 in 4 children in">
+<link rel="canonical" href="http://www.gmpag.org/poverty-in-gm-november-2014/charts-and-commentaries/child-poverty/">
+<meta property="og:locale" content="en_US">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Local authority poverty indicators - Greater Manchester Poverty Action Group">
+<meta property="og:description" content="Indicator: The estimated percentage&nbsp;of children living in households on low incomes after&nbsp;housing costs. Overview On average, more than&nbsp;1 in 4 children in">
+<meta property="og:url" content="http://www.gmpag.org/poverty-in-gm-november-2014/charts-and-commentaries/child-poverty/">
+<meta property="og:site_name" content="Greater Manchester Poverty Action Group">
+<meta property="og:image" content="http://www.gmpag.org/wp-content/uploads/2014/11/childrenLA-1024x724.png">
+<meta property="og:image" content="http://www.gmpag.org/wp-content/uploads/2014/11/child-1024x723.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:description" content="Indicator: The estimated percentage&nbsp;of children living in households on low incomes after&nbsp;housing costs. Overview On average, more than&nbsp;1 in 4 children in">
+<meta name="twitter:title" content="Local authority poverty indicators - Greater Manchester Poverty Action Group">
+<meta name="twitter:site" content="@GMPovertyAction">
+<meta name="twitter:domain" content="Greater Manchester Poverty Action Group">
+<meta name="twitter:image:src" content="/wp-content/uploads/2014/11/childrenLA-1024x724.png">
+<meta name="twitter:creator" content="@GMPovertyAction">
+<!-- / Yoast WordPress SEO plugin. -->
+
+<link rel="stylesheet" href="../assets/css_002.css">
+<link rel="stylesheet" href="../assets/style_002.css">
+<style type="text/css">
+footer.content-info {color:#8C8989;background:#282a2b;padding: 18px 10px 18px;}footer div.container { margin-top:0px;}#copyright-bar { line-height: 30px;}#footer_social_bar { line-height: 30px;font-size: 16px;text-align: right;}#footer_social_bar a { margin-left: 9px;padding: 3px;color:#8C8989;}#footer_social_bar a:hover, #footer_social_bar a:active { color:#ffc200 !important;text-decoration:none;}
+.jumbotron {background-image: url( 'http://www.gmpag.org/wp-content/uploads/2014/03/GMPAG-smaller.jpg' ); background-repeat: repeat; background-position: top left;margin-bottom: 0px;}
+.navbar-static-top { margin-top:px !important; margin-bottom:px !important; }
+</style>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/analytics.js" async=""></script><script src="../assets/piwik.js" defer="defer" async="" type="text/javascript"></script><script type="text/javascript" src="../assets/jquery_002.js"></script>
+<script type="text/javascript" src="../assets/modernizr-2.js"></script>
+<link rel="stylesheet" id="redux-google-fonts-css" href="../assets/css.css" type="text/css" media="all">
+  <link rel="alternate" type="application/rss+xml" title="Greater Manchester Poverty Action Group Feed" href="http://www.gmpag.org/feed/">
+
+    <title>Poverty monitor - Greater Manchester Poverty Action Group</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.css" />
+    <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/3.13/themes/css/cartodb.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.7/css/jquery.dataTables.min.css" />
+
+</head>
+<body class="page page-id-960 page-child parent-pageid-538 page-template page-template-template-custom-php child-poverty">
+
+  <!--[if lt IE 8]>
+    <div class="alert alert-warning">
+      You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.    </div>
+  <![endif]-->
+
+
+
+                <header class="banner navbar navbar-default topnavbar navbar navbar-static-top default" role="banner">
+  <div class="navbar-inside container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-main, .nav-extras">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand logo" href="http://www.gmpag.org/"><img id="site-logo" src="../assets/GMPAG_Logo1.png" alt="Greater Manchester Poverty Action Group"></a>    </div>
+    <div class="nav-extras">
+          </div>
+    <nav class="nav-main navbar-collapse collapse" role="navigation">
+          <form role="search" method="get" id="searchform" class="form-search pull-right navbar-form" action="http://www.gmpag.org/">
+      <label class="hide" for="s">Search for:</label>
+      <input name="s" id="s" class="form-control search-query" placeholder="Search" type="text">
+    </form>
+    <ul id="menu-menu-1" class="nav navbar-nav"><li class="menu-home"><a title="Home" href="http://www.gmpag.org/">Home</a></li>
+<li class="menu-topics dropdown"><a title="Topics" href="#" data-toggle="dropdown" class="dropdown-toggle">Topics <span class="caret"></span></a>
+<ul role="menu" class=" dropdown-menu">
+	<li class="menu-access-to-services"><a title="Access To Services" href="http://www.gmpag.org/topic/access-to-services/"><span class="glyphicon fa fa-key"></span>&nbsp;Access To Services</a></li>
+	<li class="menu-child-poverty"><a title="Child Poverty" href="http://www.gmpag.org/topic/child-poverty/"><span class="glyphicon fa fa-dot-circle-o"></span>&nbsp;Child Poverty</a></li>
+	<li class="menu-finance"><a title="Finance" href="http://www.gmpag.org/topic/finance/"><span class="glyphicon fa fa-gbp"></span>&nbsp;Finance</a></li>
+	<li class="menu-food"><a title="Food" href="http://www.gmpag.org/topic/food/"><span class="glyphicon fa fa-cutlery"></span>&nbsp;Food</a></li>
+	<li class="menu-fuel"><a title="Fuel" href="http://www.gmpag.org/topic/fuel/"><span class="glyphicon fa fa-fire"></span>&nbsp;Fuel</a></li>
+	<li class="menu-in-work-poverty"><a title="In Work Poverty" href="http://www.gmpag.org/topic/in-work-poverty/"><span class="glyphicon fa fa-briefcase"></span>&nbsp;In Work Poverty</a></li>
+	<li class="menu-business-growth"><a title="Business &amp; Growth" href="http://www.gmpag.org/topic/business-growth/"><span class="glyphicon fa fa-rocket"></span>&nbsp;Business &amp; Growth</a></li>
+</ul>
+</li>
+<li class="active menu-poverty-monitor dropdown"><a title="Poverty monitor" href="#" data-toggle="dropdown" class="dropdown-toggle">Poverty monitor <span class="caret"></span></a>
+<ul role="menu" class=" dropdown-menu">
+	<li class="menu-local-authority-maps-and-graphs"><a title="Local authority maps and graphs" href="/poverty-monitor/indicator-visualisations/?level=local-authority-and-region">Local authority maps and graphs</a></li>
+	<li class="menu-detailed-maps"><a title="Detailed maps" href="/poverty-monitor/indicator-visualisations/?level=lsoa">Detailed maps</a></li>
+	<li class="active menu-november-2014-report active"><a title="November 2014 report" href="/poverty-in-gm-november-2014/"><span class="glyphicon Poverty in Greater Manchester &#8211; November 2014"></span>&nbsp;November 2014 report</a></li>
+</ul>
+</li>
+<li class="menu-projects"><a title="Projects" href="http://www.gmpag.org/topic/projects/">Projects</a></li>
+<li class="menu-events"><a title="Events" href="http://www.gmpag.org/events/">Events</a></li>
+<li class="menu-about dropdown"><a title="About" href="#" data-toggle="dropdown" class="dropdown-toggle">About <span class="caret"></span></a>
+<ul role="menu" class=" dropdown-menu">
+	<li class="menu-the-group"><a title="The Group" href="http://www.gmpag.org/about-us/">The Group</a></li>
+	<li class="menu-the-members"><a title="The Members" href="http://www.gmpag.org/meet-members/">The Members</a></li>
+</ul>
+</li>
+</ul><div id="navbar_social_bar"><a class="btn btn-link navbar-btn" href="https://twitter.com/GMPovertyAction" target="_blank" title="twitter"><i class="icon el-icon-twitter"></i> </a></div>    </nav>
+      </div>
+</header>
+
+
+      <div class="before-main-wrapper">
+      <div id="megaDrop" class="top-megamenu container"><div class="row"></div></div></div><div class="clearfix"></div>
+
+
+      <div class="breadTrail container">
+          <ul class="breadcrumb">
+              <li itemscope="" itemtype="http://data-vocabulary.org/Breadcrumb">
+                  <a href="/" itemprop="url title">
+                      <i class="fa fa-home"></i>
+                      GMPAG
+                  </a>
+              </li>
+              <li id="leaf-breadcrumb" class="active">Poverty monitor indicator descriptions</li>
+          </ul>
+      </div>
+
+
+
+      <div id="indicator-description" class="wrap main-section container" role="document">
+
+          <h1 id="indicator-name">...loading indicator information...</h1>
+
+          <h2>What is this indicator?</h2>
+          <div class="what-is-this-indicator"> </div>
+
+          <h2>How is the indicator calculated?</h2>
+          <div class="how-is-the-indicator-calculated"> </div>
+
+          <h2>What unit is used?</h2>
+          <div class="what-unit-is-used"> </div>
+
+          <h2>When was the latest data measured?</h2>
+          <div class="when-was-the-latest"> </div>
+
+          <h2>What date range of data is available?</h2>
+          <div class="what-date-range"> </div>
+
+          <h2>How often is the data be updated?</h2>
+          <div class="how-often"> </div>
+
+          <h2>What geographic areas does the indicator cover?</h2>
+          <div class="what-geographic-areas"> </div>
+
+          <h2>What else should I know?</h2>
+          <div class="what-else-should-i-know"> </div>
+
+          <h2>Where is the data from?</h2>
+          <div class="where-is-the-data-from"> </div>
+
+          <div class="links">
+              Links:
+              <ul>
+                  <li><a href="/poverty-monitor/indicator-visualisations?level=local-authority-and-region">Visualisations</a> of this indicator and others for Greater Manachester</li>
+              </ul>
+          </div>
+      </div>
+
+
+
+    <section class="cta">
+  <div class="container">
+  <div class="row">
+  <div class="col-md-12">
+  <h1>Help Us</h1>
+  <p>GMPAG needs ideas and information to be as effective as possible,
+  please use the form below to give us your ideas or to tell us about
+  anything that you think we should know.</p>
+  <div class="wpcf7" id="wpcf7-f89-o1">
+  <div class="screen-reader-response"></div>
+  <form action="/poverty-in-gm-november-2014/charts-and-commentaries/child-poverty/#wpcf7-f89-o1" method="post" class="wpcf7-form">
+  <div style="display: none;">
+  <input name="_wpcf7" value="89" type="hidden">
+  <input name="_wpcf7_version" value="3.8.1" type="hidden">
+  <input name="_wpcf7_locale" value="en_US" type="hidden">
+  <input name="_wpcf7_unit_tag" value="wpcf7-f89-o1" type="hidden">
+  <input name="_wpnonce" value="0206af768f" type="hidden">
+  </div>
+  <div class="col-md-6">
+  <div class="row">
+  <div class="col-md-6">
+  <div class="form-group">
+    <label class="control-label" for="your-name">Your Name</label><br>
+    <span class="wpcf7-form-control-wrap your-name"><input name="your-name" size="40" class="wpcf7-form-control wpcf7-text wpcf7-validates-as-required form-control" id="your-name" aria-required="true" aria-invalid="false" type="text"></span>
+  </div>
+  </div>
+  <div class="col-md-6">
+  <div class="form-group">
+    <label class="control-label" for="your-email">Your Email</label><br>
+    <span class="wpcf7-form-control-wrap your-email"><input name="your-email" size="40" class="wpcf7-form-control wpcf7-text wpcf7-email wpcf7-validates-as-email form-control" id="your-email" aria-invalid="false" type="text"></span>
+  </div>
+  </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label" for="reason">What do you want to say?</label><br>
+    <span class="wpcf7-form-control-wrap reason"><select name="reason" class="wpcf7-form-control wpcf7-select form-control" id="reason" aria-invalid="false"><option selected="selected" value="I have a question">I have a question</option><option value="I'd like to become a member of GMPAG">I'd like to become a member of GMPAG</option><option value="I want to raise a concern">I want to raise a concern</option><option value="I have an event that I think you would be interested in">I have an event that I think you would be interested in</option><option value="I want to let you know about a community group or event">I want to let you know about a community group or event</option><option value="I have a suggestion...">I have a suggestion...</option></select></span>
+  </div>
+  </div>
+  <div class="col-md-6">
+  <div class="form-group">
+    <label class="control-label" for="your-message">Your Message</label><br>
+    <span class="wpcf7-form-control-wrap your-message"><textarea name="your-message" cols="40" rows="5" class="wpcf7-form-control wpcf7-textarea wpcf7-validates-as-required form-control" id="your-message" aria-required="true" aria-invalid="false"></textarea></span>
+   </div>
+  <div class="form-group text-right">
+  <input value="Send" class="wpcf7-form-control wpcf7-submit btn btn-danger btn-lg" type="submit"><img style="visibility: hidden;" alt="Sending ..." src="../assets/ajax-loader.gif" class="ajax-loader">
+  </div>
+  </div>
+  <div class="wpcf7-response-output wpcf7-display-none"></div></form></div></div>
+  </div>
+  </div>
+  </section>      <footer class="content-info" role="contentinfo">
+    <div class="container">    <div class="row">
+        <div class="col-md-4"><section id="text-2" class="well widget widget_text"><h3 class="widget-title">About GMPAG</h3>			<div class="textwidget"><p>The
+   Greater Manchester Poverty Action Group was formed to help maintain the
+   momentum developed by the Greater Manchester Poverty Commission’s
+  report of February 2013 and to ensure that the recommendations contained
+   within the report were acted upon.<br>
+  <a href="http://www.gmpag.org/about-us/">more...</a></p>
+  </div>
+  		</section></div><div class="col-md-4"><section id="nav_menu-3" class="well widget widget_nav_menu"><h3 class="widget-title">Topics</h3><ul id="menu-topic-menu" class="menu"><li class="menu-access-to-services"><a title="Access To Services" href="http://www.gmpag.org/topic/access-to-services/"><span class="glyphicon fa fa-key"></span>&nbsp;Access To Services</a></li>
+  <li class="menu-child-poverty"><a title="Child Poverty" href="http://www.gmpag.org/topic/child-poverty/"><span class="glyphicon fa fa-dot-circle-o"></span>&nbsp;Child Poverty</a></li>
+  <li class="menu-finance"><a title="Finance" href="http://www.gmpag.org/topic/finance/"><span class="glyphicon fa fa-money"></span>&nbsp;Finance</a></li>
+  <li class="menu-food"><a title="Food" href="http://www.gmpag.org/topic/food/"><span class="glyphicon fa fa-cutlery"></span>&nbsp;Food</a></li>
+  <li class="menu-fuel"><a title="Fuel" href="http://www.gmpag.org/topic/fuel/"><span class="glyphicon fa fa-fire"></span>&nbsp;Fuel</a></li>
+  <li class="menu-in-work-poverty"><a title="In Work Poverty" href="http://www.gmpag.org/topic/in-work-poverty/"><span class="glyphicon fa fa-briefcase"></span>&nbsp;In Work Poverty</a></li>
+  <li class="menu-business-growth"><a title="Business &amp; Growth" href="http://www.gmpag.org/topic/business-growth/"><span class="glyphicon fa fa-rocket"></span>&nbsp;Business &amp; Growth</a></li>
+  <li class="menu-projects"><a title="Projects" href="http://www.gmpag.org/topic/projects/"><span class="glyphicon fa fa-cogs"></span>&nbsp;Projects</a></li>
+  </ul></section></div><div class="col-md-4">		<section id="recent-posts-3" class="well widget widget_recent_entries">		<h3 class="widget-title">Recent</h3>		<ul>
+  					<li>
+  				<a href="http://www.gmpag.org/salfords-improving-financial-resilience-project/">Salford’s Improving Financial Resilience project</a>
+  						</li>
+  					<li>
+  				<a href="http://www.gmpag.org/british-aisles/">British Aisles</a>
+  						</li>
+  					<li>
+  				<a href="http://www.gmpag.org/the-right-type-of-labour-market/">The ‘right type’ of labour market</a>
+  						</li>
+  					<li>
+  				<a href="http://www.gmpag.org/gmpag-march-2015-newsletter/">GMPAG March 2015 Newsletter</a>
+  						</li>
+  					<li>
+  				<a href="http://www.gmpag.org/wcas-it-could-be-you/">WCAs It could be you</a>
+  						</li>
+  					<li>
+  				<a href="http://www.gmpag.org/will-poverty-feature-in-the-general-election/">Will poverty feature in the General Election?</a>
+  						</li>
+  					<li>
+  				<a href="http://www.gmpag.org/on-the-frontline-of-tackling-fuel-poverty/">On the Frontline of Tackling Fuel Poverty</a>
+  						</li>
+  				</ul>
+  		</section></div></div>
+    <div id="footer-copyright">
+      <article class="container">
+        <div id="copyright-bar" class="col-lg-6">© 2015 Greater Manchester Poverty Action Group</div>
+                <div id="footer_social_bar" class="col-lg-6">
+                      <a href="https://twitter.com/GMPovertyAction" target="_blank" title="twitter">
+                <span class="icon el-icon-twitter"></span>
+              </a>
+                    </div>
+            </article>
+    </div>
+        </div>
+
+  </footer>
+
+
+
+
+    <!-- Piwik -->
+  <script type="text/javascript">
+    var _paq = _paq || [];
+    _paq.push(['trackPageView']);
+    _paq.push(['enableLinkTracking']);
+    (function() {
+      var u="//analytics.hellings.webfactional.com/";
+      _paq.push(['setTrackerUrl', u+'piwik.php']);
+      _paq.push(['setSiteId', 5]);
+      var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+      g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+    })();
+  </script>
+  <!-- End Piwik Code -->
+  <script type="text/javascript" src="../assets/jquery.js"></script>
+  <script type="text/javascript">
+  /* <![CDATA[ */
+  var _wpcf7 = {"loaderUrl":"http:\/\/www.gmpag.org\/wp-content\/plugins\/contact-form-7\/images\/ajax-loader.gif","sending":"Sending ..."};
+  /* ]]> */
+  </script>
+  <script type="text/javascript" src="../assets/scripts.js"></script>
+  <script type="text/javascript" src="../assets/bootstrap.js"></script>
+  <script type="text/javascript" src="../assets/main.js"></script>
+  <script type="text/javascript" src="../assets/retina.js"></script>
+  <script type="text/javascript" src="../assets/jquery_003.js"></script>
+  <script id="core.advanced-user-js">(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-48954711-1', 'gmpag.org');
+  ga('require', 'displayfeatures');
+  ga('send', 'pageview');</script>
+
+
+
+
+
+
+
+
+
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script src="../GoogleDataLoader.js"></script>
+
+
+    <script>
+
+    var indicator_name = null;
+
+    function paragraphise(s) {
+
+        var result =
+        '<p>'
+        +
+        s
+        .split(/(\n\n|\r\n\r\n)/)          // break in to prargraphs
+        .filter( function(para) {          // kill whitespace-only paragraphs
+            return ! para.match( /^\s*$/ );
+        } )
+        .map( function (para) {            // replace remaining breaks with html
+            return para.trim().replace( "/(\n|\r\n)/", "<br />" );
+        } )
+        .join("</p><p>")                   // glue paras back together with html
+        +
+        "</p>";
+
+        // console.debug( result );
+
+        return result;
+    }
+
+    function setIndicatorDescriptionText( description_fields )
+    {
+        console.debug( description_fields );
+
+        for ( var key in description_fields ) {
+            if( description_fields.hasOwnProperty( key ) ) {
+
+                if ( key == "indicator-name" ) {
+                    jQuery("#indicator-name").text(description_fields["indicator-name"]);
+                }
+                else if ( typeof key == 'string'  &&  key.length > 0 ) {
+                    console.debug( key );
+                    jQuery("#indicator-description ." + key).replaceWith(paragraphise(description_fields[key]));
+                }
+            }
+        }
+    }
+
+    function inflatePage( indicator_descriptions )
+    {
+        indicator_descriptions.getRow = function ( page_title ) {
+
+            var rx = this[0].data.reduce( function ( found_index, row_title, current_index ) {
+
+                if ( found_index !== null ) {
+                    return found_index;
+                }
+                else if ( row_title == page_title ) {
+                    return current_index;
+                }
+                else {
+                    return null;
+                }
+            }, null );
+
+            if ( rx == -1 ) {
+                return null;
+            }
+            else
+            {
+                return this.reduce( function( row, col ) {
+                    row[col.label] = col.data[rx];
+                    return row;
+                }, {} );
+            }
+        }
+
+        setIndicatorDescriptionText( indicator_descriptions.getRow( indicator_name ) );
+    }
+
+
+    function getParameterFromQueryString(name) {
+        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+            results = regex.exec(location.search);
+        return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+
+
+    // And go...
+
+    indicator_name = getParameterFromQueryString( 'name' );
+    GoogleDataLoader.gimme( "https://docs.google.com/spreadsheets/d/1_3gRhw7tOwXxYvAjYtqZATL6xfaET9mAFUQpNt_OegQ/gviz/tq", inflatePage );
+    </script>
+
+</body>
+</html>
