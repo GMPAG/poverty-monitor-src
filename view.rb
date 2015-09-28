@@ -41,6 +41,10 @@ class View < Mustache
             add_desc_styles context
             add_desc_scripts context
         end
+        if context[:src_filename] == './src/indicator-descriptions/all/index.html.mustache'
+            add_all_desc_styles context
+            add_all_desc_scripts context
+        end
     end
 
 
@@ -141,6 +145,17 @@ class View < Mustache
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script src="../GoogleDataLoader.js"></script>
     <script src="descriptions.js"></script>
+~
+    end
+
+    def add_all_desc_styles context
+    end
+
+    def add_all_desc_scripts context
+        context[:scripts] = %q~
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script src="../../GoogleDataLoader.js"></script>
+    <script src="all-descriptions.js"></script>
 ~
     end
 end
