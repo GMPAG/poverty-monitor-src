@@ -60,7 +60,7 @@ class View < Mustache
     end
 
     def add_viz_styles context
-            context[:styles] = %q@
+            context[:styles] = %q~
     <style>
 
     #measure-name {
@@ -119,28 +119,28 @@ class View < Mustache
     }
 
     </style>
-@
+~
     end
 
     def add_viz_scripts context
-        context[:scripts] = %q@
+        context[:scripts] = %q~
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.js"></script>
     <script src="http://libs.cartocdn.com/cartodb.js/v3/3.13/cartodb.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.7/js/jquery.dataTables.min.js"></script>
     <script src="../CartoDbDataLoader.js"></script>
     <script src="visualisations.js"></script>
-@
+~
     end
 
     def add_desc_styles context
     end
 
     def add_desc_scripts context
-        context[:scripts] = %q@
+        context[:scripts] = %q~
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script src="../GoogleDataLoader.js"></script>
     <script src="descriptions.js"></script>
-@
+~
     end
 end
