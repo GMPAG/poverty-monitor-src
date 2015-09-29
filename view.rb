@@ -149,11 +149,19 @@ class View < Mustache
     end
 
     def add_all_desc_styles context
+        context[:styles] = %q~
+<style>
+    #all-descriptions p {
+        margin-bottom: 0;
+    }
+</style>
+~
     end
 
     def add_all_desc_scripts context
         context[:scripts] = %q~
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script src="../../CartoDbDataLoader.js"></script>
     <script src="../../GoogleDataLoader.js"></script>
     <script src="all-descriptions.js"></script>
 ~

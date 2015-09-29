@@ -47,6 +47,13 @@ var CartoDbDataLoader = new function () {
             }
         );
 
+        result.getColumnByProperty = function( property_name, property_value )
+        {
+            return this.filter( function ( column ) {
+                return column[property_name] == property_value;
+            } )[0];
+        };
+
         return result;
     };
 
@@ -94,7 +101,7 @@ var CartoDbDataLoader = new function () {
 
     ////// Privileged //////
 
-    this.gimme = function ( dataset_name, callback )
+    this.gimme = function ( dataset_name, x_axis_name, callback )
     {
         storedCallback = callback;
         xAxisName = x_axis_name;
