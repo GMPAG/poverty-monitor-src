@@ -45,7 +45,7 @@ footer.content-info .widget ul li{
 	content: "\f154";
 }
 .fa.cat-business-growth:before{
-	content: "\f135";
+	content: "\f148";
 }
 .fa.cat-in-work-poverty:before{
 	content: "\f0b1";
@@ -58,6 +58,10 @@ footer.content-info .widget ul li{
 }
 .fa.cat-fuel:before{
 	content: "\f06d";
+}
+.fa.cat-housing:before,
+.fa.cat-housing-2:before{
+	content: "\f0f7";
 }
 
 .jumbotron{
