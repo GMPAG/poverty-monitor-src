@@ -374,12 +374,6 @@ switch ( getParameterFromQueryString( 'level' ) )
     case 'local-authority-and-region':
         dataset_name = 'localauthoritymultiindicator_rg';
         CartoDbDataLoader.gimme( dataset_name, x_axis_name, makePageElements );
-        loadCartoDbTable(
-            'lsoamultiindicator',
-            'lsoamultiindicator_columnmetadata2',
-            'indicator_property',
-            function(table){console.debug(table);}
-        );
         jQuery( '#page-title' ).text( 'Local authorities' );
         createMap( '6d084fac-ef4a-11e4-96e6-0e0c41326911' );
         jQuery('#list-of-links').append('<li>You can see visualisations of some of these indicators on a <a href="/poverty-monitor/indicator-visualisations?level=lsoa">much smaller scale</a>. (The smaller areas are called "Lower Super Output Areas".)</li>');
@@ -394,7 +388,13 @@ switch ( getParameterFromQueryString( 'level' ) )
         break;
     case 'lsoa':
         dataset_name = 'lsoamultiindicator';
-        CartoDbDataLoader.gimme( dataset_name, x_axis_name, makePageElements );
+        loadCartoDbTable(
+            'lsoamultiindicator',
+            'lsoamultiindicator_columnmetadata2',
+            'indicator_property',
+            makePageElements
+        );
+//         CartoDbDataLoader.gimme( dataset_name, x_axis_name, makePageElements );
         jQuery( '#page-title' ).text( 'Lower layer super output areas' );
         //             jQuery( '#measure-selector .btn-group' )[1].remove();
         createMap( 'a5053f5c-05f0-11e5-822d-0e4fddd5de28' );

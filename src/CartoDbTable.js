@@ -13,7 +13,7 @@
 // Optional param metadata_property_names_column_name is the name of the column
 // in the metadata table that contains the metadata property names.
 //
-function CartoDbTable( raw_table, raw_columns_metadata_table, metadata_property_names_column_name ) {
+function CartoDbTable( raw_table ) {
 
     /////// Private ///////
 
@@ -98,21 +98,19 @@ function CartoDbTable( raw_table, raw_columns_metadata_table, metadata_property_
         return columnsMetadata[column_name][property_name];
     }
 
+    // Given a CartoDbTable containing column-metadata and the name of the
+    // column in that table that contains the property names for that
+    // metadata, add the relevant column properties to the current
+    // table.
+    //
+    this.addColumnProperties = function( metadata_table, property_names_column_name ) {
 
-    /////// Constructor Code ////////
-
-    if (raw_columns_metadata_table) {
-        // The constructor arguments included a metadata table, so add the
-        // metadata to the columnsMetadata.
-
-        var metadata_table = new CartoDbTable(raw_columns_metadata_table);
-
-        if ( ! metadata_table.hasColumn(metadata_property_names_column_name) ) {
-            console.error( "Invalid column name (" + metadata_property_names_column_name + ") given for metdata property names." );
+        if ( ! metadata_table.hasColumn(property_names_column_name) ) {
+            console.error( "Invalid column name (" + property_names_column_name + ") given for metdata property names." );
             return;
         }
 
-        var property_names = metadata_table.column(metadata_property_names_column_name);
+        var property_names = metadata_table.column(property_names_column_name);
 
         // For each data table column
         this.userDefinedColumnNames().forEach( function(column_name) {
@@ -127,7 +125,6 @@ function CartoDbTable( raw_table, raw_columns_metadata_table, metadata_property_
                 });
             }
         });
-
     }
 }
 
@@ -166,22 +163,24 @@ function loadCartoDbTable( dataset_name, metadata_dataset_name, metadata_propert
                     return;
                 }
             }
-            console.error( "Request failed. Ready state: " + request.readyState + ", Status: " + request.statusText );
+            console.error( "Request failed. Ready state: " + request.readyState
+                          + ", Status: " + request.statusText
+                          + ", everything else: " + event );
         };
     };
 
-    // Pass the loaded CartoDbTable to the client-supplied callback.
+    // Pass the requested CartoDbTable to the client-supplied callback.
     var callClientCallback = function( metadata_request, data_request )
     {
-        var raw_metadata_table = null;
+        var result = new CartoDbTable( JSON.parse( data_request.responseText ) );
+
         if ( metadata_request ) {
-            raw_metadata_table = JSON.parse( metadata_request.responseText );
+            result.addColumnProperties(
+                new CartoDbTable( JSON.parse( metadata_request.responseText ) ),
+                metadata_property_names_column_name );
         }
 
-        callback( new CartoDbTable(
-            JSON.parse( data_request.responseText ),
-            raw_metadata_table,
-            metadata_property_names_column_name ) );
+        callback( result );
     };
 
     // Request metadata for the indicated metadata dataset.
