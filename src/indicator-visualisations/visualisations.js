@@ -374,6 +374,12 @@ switch ( getParameterFromQueryString( 'level' ) )
     case 'local-authority-and-region':
         dataset_name = 'localauthoritymultiindicator_rg';
         CartoDbDataLoader.gimme( dataset_name, x_axis_name, makePageElements );
+        loadCartoDbTable(
+            'lsoamultiindicator',
+            'lsoamultiindicator_columnmetadata2',
+            'indicator_property',
+            function(table){console.debug(table);}
+        );
         jQuery( '#page-title' ).text( 'Local authorities' );
         createMap( '6d084fac-ef4a-11e4-96e6-0e0c41326911' );
         jQuery('#list-of-links').append('<li>You can see visualisations of some of these indicators on a <a href="/poverty-monitor/indicator-visualisations?level=lsoa">much smaller scale</a>. (The smaller areas are called "Lower Super Output Areas".)</li>');

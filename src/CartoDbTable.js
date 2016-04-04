@@ -13,7 +13,7 @@
 // Optional param metadata_property_names_column_name is the name of the column
 // in the metadata table that contains the metadata property names.
 //
-var CartoDbTable = new function( raw_table, raw_columns_metadata_table, metadata_property_names_column_name ) {
+function CartoDbTable( raw_table, raw_columns_metadata_table, metadata_property_names_column_name ) {
 
     /////// Private ///////
 
@@ -34,6 +34,10 @@ var CartoDbTable = new function( raw_table, raw_columns_metadata_table, metadata
     // { column name: { property name: property value, ... }, ... }
     var columnsMetadata = raw_table.fields;
 
+    // DEBUG - HACK
+    this.rows = rows;
+    this.columnsMetadata = columnsMetadata;
+
     // Get the values in a given column from the rows data.
     var getColumnFromRows = function(name) {
         if ( ! that.hasColumn(name) ) {
@@ -44,11 +48,10 @@ var CartoDbTable = new function( raw_table, raw_columns_metadata_table, metadata
 
     // Some columns are only used for Carto Maps and should not be part of
     // the interface to this object.
-    var isPublicColumnName = function(name) {
-        return name != 'cartodb_id' &&
-            name != 'the_geom' &&
-            name != 'the_geom_webmercator' &&
-            that.hasColumn(name);
+    var isPrivateColumnName = function(name) {
+        return name == 'cartodb_id' ||
+            name == 'the_geom' ||
+            name == 'the_geom_webmercator';
     }
 
 
@@ -75,20 +78,21 @@ var CartoDbTable = new function( raw_table, raw_columns_metadata_table, metadata
     this.hasColumn = function(name) {
         // The columnsMetadata is keyed by column name, so this is one way to
         // check whether a column name exists.
-        return columnsMetadata.hasOwnProperty(column_name);
+        return columnsMetadata.hasOwnProperty(name);
     }
 
     this.columnNames = function() {
         var result = [];
         for (column_name in columnsMetadata) {
-            if isPublicColumnName(columnName) {
+            // Exclude map-relevant columns from the column list
+            if ( ! isPrivateColumnName(column_name) ) {
                 result.push(column_name);
             }
         }
         return result;
     }
 
-    this.columnProperty( column_name, property_name ) {
+    this.columnProperty = function( column_name, property_name ) {
         return columnsMetadata[column_name][property_name];
     }
 
@@ -99,8 +103,15 @@ var CartoDbTable = new function( raw_table, raw_columns_metadata_table, metadata
         // The constructor arguments included a metadata table, so add the
         // metadata to the columnsMetadata.
 
-        var metadata_table = new CartoTable(raw_columns_metadata_table);
-        var property_names = metadata_table.column();
+        var metadata_table = new CartoDbTable(raw_columns_metadata_table);
+
+        if ( ! metadata_table.hasColumn(metadata_property_names_column_name) ) {
+            console.error( "Invalid column name (" + metadata_property_names_column_name + ") given for metdata property names." );
+            return;
+        }
+
+        var property_names = metadata_table.column(metadata_property_names_column_name);
+        console.debug(property_names);
 
         // For each data table column
         this.columnNames().forEach( function(column_name) {
@@ -111,7 +122,7 @@ var CartoDbTable = new function( raw_table, raw_columns_metadata_table, metadata
             if ( metadata_table.hasColumn(column_name) ) {
 
                 property_names.forEach( function(property_name, i) {
-                    columnsMetadata[column_name][property_name] = metadata_table.value(column_name, i)
+                    columnsMetadata[column_name][property_name] = metadata_table.value(i, column_name)
                 });
             }
         });
@@ -129,6 +140,8 @@ var CartoDbTable = new function( raw_table, raw_columns_metadata_table, metadata
 //
 // Param metadata_property_names_column_name is either null or the name of the
 // column in the metadata dataset that contains the metadata property names.
+// If metadata_dataset_name is non-null then this param *must* be a vaild
+// column name in the relevant table.
 //
 // Param callback is a function to call on completion of the asynchronous
 // CartoDB API request. The callback receives a single argument; an instance
@@ -136,7 +149,7 @@ var CartoDbTable = new function( raw_table, raw_columns_metadata_table, metadata
 //
 function loadCartoDbTable( dataset_name, metadata_dataset_name, metadata_property_names_column_name, callback ) {
 
-    // Helper fn to make callbacks on successful http requests.
+    // Helper fn to execute an http request and trigger a callback on success.
     var getOnLoadFunction = function( requestHandler, params )
     {
         //console.debug( arguments.callee.toString().split("\n")[0] );
@@ -156,11 +169,12 @@ function loadCartoDbTable( dataset_name, metadata_dataset_name, metadata_propert
         };
     };
 
+    // Pass the loaded CartoDbTable to the client-supplied callback.
     var callClientCallback = function( metadata_request, data_request )
     {
         var raw_metadata_table = null;
         if ( metadata_request ) {
-            raw_metadata_table = JSON.parse( columns_metadata_request.responseText );
+            raw_metadata_table = JSON.parse( metadata_request.responseText );
         }
 
         callback( new CartoDbTable(
@@ -169,7 +183,8 @@ function loadCartoDbTable( dataset_name, metadata_dataset_name, metadata_propert
             metadata_property_names_column_name ) );
     };
 
-    var getColumnsMetadata = function( data_request )
+    // Request metadata for the indicated metadata dataset.
+    var getMetadata = function( data_request )
     {
         if ( metadata_dataset_name ) {
             //console.debug( arguments.callee.toString().split("\n")[0] );
@@ -183,13 +198,15 @@ function loadCartoDbTable( dataset_name, metadata_dataset_name, metadata_propert
         }
     };
 
-    var getCartoDBData = function() {
+    // Request the data for the indicated dataset
+    var getDataset = function() {
         //console.debug( arguments.callee.toString().split("\n")[0] );
         var data_request = new XMLHttpRequest();
         data_request.open( "GET", "https://gmpagdata.cartodb.com/api/v2/sql?q=SELECT%20*%20FROM%20" + dataset_name + "%20ORDER%20BY%20cartodb_id", true );
-        data_request.onload = getOnLoadFunction( getColumnsMetadata );
+        data_request.onload = getOnLoadFunction( getMetadata );
         data_request.send( null );
     };
 
-    getCartoDBData();
+    // ...and go:
+    getDataset();
 };
