@@ -1,7 +1,7 @@
-// CartoDbTable wraps the parsed json object returned by the CartoDB API to
-// represent a CartoDB table. The CartoDbTable may optionally be initialised
-// with extra metadata that applies to individual columns in the data table.
-// The metadata source is another CartoDB table.
+// CartoDbDataset wraps the parsed json object returned by the CartoDB API to
+// represent a CartoDB dataset. The CartoDbDataset may optionally be
+// expanded with extra metadata that applies to individual columns in the
+// dataset. The metadata source is another CartoDB dataset.
 //
 // Param raw_table is the table that will be wrapped.
 //
@@ -13,7 +13,7 @@
 // Optional param metadata_property_names_column_name is the name of the column
 // in the metadata table that contains the metadata property names.
 //
-function CartoDbTable( raw_table ) {
+function CartoDbDataset( raw_table ) {
 
     /////// Private ///////
 
@@ -36,8 +36,8 @@ function CartoDbTable( raw_table ) {
 
     // DEBUG - HACK
     // Uncomment these lines to make internal data structure visible to JS console.
-//     this.rows = rows;
-//     this.columnsMetadata = columnsMetadata;
+    this.rows = rows;
+    this.columnsMetadata = columnsMetadata;
 
     // Get the values in a given column from the rows data.
     var getColumnFromRows = function(name) {
@@ -61,6 +61,10 @@ function CartoDbTable( raw_table ) {
     // returns { column_name: value, ... }
     this.row = function(index) {
         return rows[index];
+    }
+
+    this.numRows = function() {
+        return rows.length;
     }
 
     // returns [ value, ... ]
@@ -98,8 +102,8 @@ function CartoDbTable( raw_table ) {
         return columnsMetadata[column_name][property_name];
     }
 
-    // Given a CartoDbTable containing column-metadata and the name of the
-    // column in that table that contains the property names for that
+    // Given a CartoDbDataset containing column-metadata and the name of the
+    // column in that dataset that contains the property names for that
     // metadata, add the relevant column properties to the current
     // table.
     //
@@ -143,9 +147,9 @@ function CartoDbTable( raw_table ) {
 //
 // Param callback is a function to call on completion of the asynchronous
 // CartoDB API request. The callback receives a single argument; an instance
-// of CartoDbTable.
+// of CartoDbDataset.
 //
-function loadCartoDbTable( dataset_name, metadata_dataset_name, metadata_property_names_column_name, callback ) {
+function loadCartoDbDataset( dataset_name, metadata_dataset_name, metadata_property_names_column_name, callback ) {
 
     // Helper fn to execute an http request and trigger a callback on success.
     var getOnLoadFunction = function( requestHandler, params )
@@ -169,14 +173,14 @@ function loadCartoDbTable( dataset_name, metadata_dataset_name, metadata_propert
         };
     };
 
-    // Pass the requested CartoDbTable to the client-supplied callback.
+    // Pass the requested CartoDbDataset to the client-supplied callback.
     var callClientCallback = function( metadata_request, data_request )
     {
-        var result = new CartoDbTable( JSON.parse( data_request.responseText ) );
+        var result = new CartoDbDataset( JSON.parse( data_request.responseText ) );
 
         if ( metadata_request ) {
             result.addColumnProperties(
-                new CartoDbTable( JSON.parse( metadata_request.responseText ) ),
+                new CartoDbDataset( JSON.parse( metadata_request.responseText ) ),
                 metadata_property_names_column_name );
         }
 
