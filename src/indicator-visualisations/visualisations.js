@@ -218,9 +218,7 @@ function onMeasureClicked(e)
 
 function createSelector( dataset )
 {
-    dataset.userDefinedColumnNames().filter( function ( column_name ) {
-        return dataset.columnProperty(column_name, 'POVMON_ITERATION') == povmon_iteration;
-    } ).forEach( function (column_name)
+    dataset.getColumnNamesByColumnProperty('POVMON_ITERATION', povmon_iteration).forEach( function (column_name)
                 {
                     //             jQuery( '#measure-selector .top-level li' ).click( onCategoryClicked );
 
@@ -411,10 +409,11 @@ switch ( getParameterFromQueryString( 'level' ) )
             'lsoamultiindicator',
             'lsoamultiindicator_columnmetadata2',
             'indicator_property',
-            function(dataset){console.debug(dataset);}
-//             makePageElements
+//             function(dataset){console.debug(dataset);}
+//             function(carto_dataset){ makePageElements( new PovmonDataset(carto_dataset)); }
+            makePageElements
         );
-        CartoDbDataLoader.gimme( dataset_name, x_axis_name, makePageElements );
+//         CartoDbDataLoader.gimme( dataset_name, x_axis_name, makePageElements );
         jQuery( '#page-title' ).text( 'Lower layer super output areas' );
         //             jQuery( '#measure-selector .btn-group' )[1].remove();
         createMap( 'a5053f5c-05f0-11e5-822d-0e4fddd5de28' );

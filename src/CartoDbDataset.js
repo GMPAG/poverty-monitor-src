@@ -17,7 +17,7 @@ function CartoDbDataset( raw_table ) {
 
     /////// Private ///////
 
-    // Give private functions access to this.
+    // Give private functions and inner functions access to this.
     var that = this;
 
     // The original CartoDB table representation: An array of rows.
@@ -36,8 +36,8 @@ function CartoDbDataset( raw_table ) {
 
     // DEBUG - HACK
     // Uncomment these lines to make internal data structure visible to JS console.
-    this.rows = rows;
-    this.columnsMetadata = columnsMetadata;
+//     this.rows = rows;
+//     this.columnsMetadata = columnsMetadata;
 
     // Get the values in a given column from the rows data.
     var getColumnFromRows = function(name) {
@@ -87,10 +87,10 @@ function CartoDbDataset( raw_table ) {
 
     // Get the names of the user-defined columns.
     // Ignores the special CartoDB-created columns
+    // To do: ??? Reimplement to use getColumnNamesByColumnProperty ???
     this.userDefinedColumnNames = function() {
         var result = [];
         for (column_name in columnsMetadata) {
-            // Exclude map-relevant columns from the column list
             if ( ! isSpecialCartoDbColumn(column_name) ) {
                 result.push(column_name);
             }
@@ -128,6 +128,12 @@ function CartoDbDataset( raw_table ) {
                     columnsMetadata[column_name][property_name] = metadata_table.value(i, column_name)
                 });
             }
+        });
+    }
+
+    this.getColumnNamesByColumnProperty = function( property_name, property_value ) {
+        return Object.keys(columnsMetadata).filter( function ( column_name ) {
+            return that.columnProperty(column_name, property_name) == property_value;
         });
     }
 }

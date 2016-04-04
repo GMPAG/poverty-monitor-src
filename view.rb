@@ -134,6 +134,7 @@ class View < Mustache
     <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.7/js/jquery.dataTables.min.js"></script>
     <script src="../CartoDbDataLoader.js"></script>
     <script src="../CartoDbDataset.js"></script>
+    <script src="../PovmonDataset.js"></script>
     <script src="visualisations.js"></script>
 ~
     end
