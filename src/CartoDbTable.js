@@ -35,8 +35,9 @@ function CartoDbTable( raw_table, raw_columns_metadata_table, metadata_property_
     var columnsMetadata = raw_table.fields;
 
     // DEBUG - HACK
-    this.rows = rows;
-    this.columnsMetadata = columnsMetadata;
+    // Uncomment these lines to make internal data structure visible to JS console.
+//     this.rows = rows;
+//     this.columnsMetadata = columnsMetadata;
 
     // Get the values in a given column from the rows data.
     var getColumnFromRows = function(name) {
@@ -46,12 +47,11 @@ function CartoDbTable( raw_table, raw_columns_metadata_table, metadata_property_
         return rows.map( function(row){ return row[name]; } );
     }
 
-    // Some columns are only used for Carto Maps and should not be part of
-    // the interface to this object.
-    var isPrivateColumnName = function(name) {
-        return name == 'cartodb_id' ||
-            name == 'the_geom' ||
-            name == 'the_geom_webmercator';
+    var isSpecialCartoDbColumn = function(name) {
+        var names_of_special_columns = [
+            'cartodb_id', 'the_geom', 'the_geom_webmercator', 'created_at', 'updated_at'
+            ];
+        return names_of_special_columns.indexOf(name) > -1;
     }
 
 
@@ -81,11 +81,13 @@ function CartoDbTable( raw_table, raw_columns_metadata_table, metadata_property_
         return columnsMetadata.hasOwnProperty(name);
     }
 
-    this.columnNames = function() {
+    // Get the names of the user-defined columns.
+    // Ignores the special CartoDB-created columns
+    this.userDefinedColumnNames = function() {
         var result = [];
         for (column_name in columnsMetadata) {
             // Exclude map-relevant columns from the column list
-            if ( ! isPrivateColumnName(column_name) ) {
+            if ( ! isSpecialCartoDbColumn(column_name) ) {
                 result.push(column_name);
             }
         }
@@ -111,10 +113,9 @@ function CartoDbTable( raw_table, raw_columns_metadata_table, metadata_property_
         }
 
         var property_names = metadata_table.column(metadata_property_names_column_name);
-        console.debug(property_names);
 
         // For each data table column
-        this.columnNames().forEach( function(column_name) {
+        this.userDefinedColumnNames().forEach( function(column_name) {
 
             // The extra metadata table need not contain metadata for every
             // column in the data table, so check whether the current column
