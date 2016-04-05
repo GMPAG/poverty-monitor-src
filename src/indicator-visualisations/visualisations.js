@@ -1,4 +1,4 @@
-var columnsList = null;
+var allIndicators = null;
 var x_axis_name = 'areaname';
 var chart = null;
 var map = null;
@@ -180,7 +180,7 @@ function selectMeasure( column )
         updateChartForMeasure( column );
     }
     updateMapForMeasure( column );
-    drawTable( columnsList.column( x_axis_name ), column );
+    drawTable( allIndicators.column( x_axis_name ), column );
 }
 
 //     function onCategoryClicked(e)
@@ -191,7 +191,7 @@ function selectMeasure( column )
 function onMeasureClicked(e)
 {
     selectMeasure(
-        columnsList.column(
+        allIndicators.column(
             jQuery(e.currentTarget).attr('measure') ) );
 }
 
@@ -218,7 +218,7 @@ function onMeasureClicked(e)
 
 function createSelector( dataset )
 {
-    dataset.getColumnNamesByColumnProperty('POVMON_ITERATION', povmon_iteration).forEach( function (column_name)
+    dataset.getLatestIndicatorKeys().forEach( function (column_name)
                 {
                     //             jQuery( '#measure-selector .top-level li' ).click( onCategoryClicked );
 
@@ -294,21 +294,22 @@ function setInitialMeasure() {
     // Does the URL indicate a measure to be shown?
     var indicator_id = getParameterFromQueryString( 'measure' );
     if ( indicator_id ) {
-        var column = columnsList.column( indicator_id );
+        var column = allIndicators.column( indicator_id );
         if ( column ) {
+            console.debug( ["Initialising with indicator found from query string", indicator_id, column] );
             selectMeasure( column );
             return;
         }
     }
 
     // No measure indicated by URL. Use default.
-
-    selectMeasure( columnsList[1]);
+    console.debug( "No indicator found from query string" );
+    selectMeasure( allIndicators[1] );
 }
 
 function makePageElements( dataset )
 {
-    columnsList = dataset;
+    allIndicators = dataset;
 
     createSelector( dataset );
 
@@ -357,7 +358,7 @@ function createMap ( mapId )
         // enough to tell us when to try selecting the initial measure.
         if ( page_ready_for_measure_selection ) {
             setInitialMeasure();
-            //                 selectCategory( 'poverty-' + columnsList[1].category + 's' );
+            //                 selectCategory( 'poverty-' + allIndicators[1].category + 's' );
         }
         else {
             page_ready_for_measure_selection = true;
@@ -410,8 +411,8 @@ switch ( getParameterFromQueryString( 'level' ) )
             'lsoamultiindicator_columnmetadata2',
             'indicator_property',
 //             function(dataset){console.debug(dataset);}
-//             function(carto_dataset){ makePageElements( new PovmonDataset(carto_dataset)); }
-            makePageElements
+            function(carto_dataset){ makePageElements( new PovmonDataset(carto_dataset)); }
+//             makePageElements
         );
 //         CartoDbDataLoader.gimme( dataset_name, x_axis_name, makePageElements );
         jQuery( '#page-title' ).text( 'Lower layer super output areas' );
