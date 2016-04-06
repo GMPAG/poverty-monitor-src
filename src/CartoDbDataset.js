@@ -98,7 +98,7 @@ function CartoDbDataset( raw_table ) {
         return result;
     }
 
-    this.columnProperty = function( column_name, property_name ) {
+    this.columnPropertyValue = function( column_name, property_name ) {
         return columnsMetadata[column_name][property_name];
     }
 
@@ -133,7 +133,7 @@ function CartoDbDataset( raw_table ) {
 
     this.getColumnNamesByColumnProperty = function( property_name, property_value ) {
         return Object.keys(columnsMetadata).filter( function ( column_name ) {
-            return that.columnProperty(column_name, property_name) == property_value;
+            return that.columnPropertyValue(column_name, property_name) == property_value;
         });
     }
 }

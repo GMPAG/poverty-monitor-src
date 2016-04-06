@@ -132,22 +132,22 @@ text-placement-type: simple;   \n\
     return result;
 }
 
-function updateMapForMeasure( column )
+function updateMapForMeasure( indicator )
 {
-    var show_labels = column.data.length < 15 ? true : false;
+    var show_labels = allIndicators.numRows() < 15 ? true : false;
 
-    map.getLayers()[1].getSubLayers()[0].setSQL( getMapSql(column) );
-    map.getLayers()[1].getSubLayers()[0].setCartoCSS( getMapCss(column.min(), column.max(), show_labels) );
+    map.getLayers()[1].getSubLayers()[0].setSQL( getMapSql(indicator) );
+    map.getLayers()[1].getSubLayers()[0].setCartoCSS( getMapCss(indicator.min(), indicator.max(), show_labels) );
 
-    jQuery( '.cartodb-legend-stack .min' ).text( column.min()+column.unitsLabel );
-    jQuery( '.cartodb-legend-stack .max' ).text( column.max()+column.unitsLabel );
+    jQuery( '.cartodb-legend-stack .min' ).text( indicator.min()+indicator.unitsLabel );
+    jQuery( '.cartodb-legend-stack .max' ).text( indicator.max()+indicator.unitsLabel );
 }
 
-function updateChartForMeasure( column )
+function updateChartForMeasure( indicator )
 {
     chart.hide();
-    chart.axis.labels( { y: column.unitsLabel } );
-    chart.show( column.label );
+    chart.axis.labels( { y: indicator.unitsLabel } );
+    chart.show( indicator.label );
 }
 
 //     function selectCategory( category )
@@ -159,28 +159,28 @@ function updateChartForMeasure( column )
 //         jQuery( '#measure-selector .second-level .' + category ).removeClass( 'hidden' );
 //     }
 
-function updateSelectorForMeasure( column )
+function updateSelectorForMeasure( indicator )
 {
     jQuery( '#measure-selector li' ).removeClass( 'active' );
-    jQuery( '#measure-selector li[measure="' + column.name + '"]' ).addClass( 'active' );
+    jQuery( '#measure-selector li[measure="' + indicator.name + '"]' ).addClass( 'active' );
 }
 
-function selectMeasure( column )
+function selectIndicator( indicator )
 {
-    jQuery( '#measure-name' ).text( column.label );
+    jQuery( '#measure-name' ).text( indicator.label );
 
     jQuery( '#description-link p' ).remove();
     jQuery( '#description-link' ).append(
         '<p>Read an <a href="/poverty-monitor/indicator-descriptions/?name='
-        + encodeURIComponent(column.descriptionPageTitle)
+        + encodeURIComponent(indicator.descriptionPageTitle)
         + '">explanation of this indicator</a>.</p>'  );
 
-    updateSelectorForMeasure( column );
+    updateSelectorForMeasure( indicator );
     if ( chart ) {
-        updateChartForMeasure( column );
+        updateChartForMeasure( indicator );
     }
-    updateMapForMeasure( column );
-    drawTable( allIndicators.column( x_axis_name ), column );
+    updateMapForMeasure( indicator );
+    drawTable( indicator );
 }
 
 //     function onCategoryClicked(e)
@@ -190,55 +190,34 @@ function selectMeasure( column )
 
 function onMeasureClicked(e)
 {
-    selectMeasure(
-        allIndicators.column(
+    selectIndicator(
+        allIndicators.indicator(
             jQuery(e.currentTarget).attr('measure') ) );
 }
 
-// function getCurrentDatasetCoumnNames( dataset, povmon_iter ) {
-
-    // Make wrapper object for table that knows about povmon
-        // PovmonDataset
-        // PovmonDataset
-        // PovmonDataset
-        // PovmonDataset
-    // Make wrapper object for table that knows about povmon
-    // Make wrapper object for table that knows about povmon
-    // Make wrapper object for table that knows about povmon
-    // Make wrapper object for table that knows about povmon
-    // Make wrapper object for table that knows about povmon
-
-// rename CartoDbTable to CartoDbDataset????
-// rename CartoDbTable to CartoDbDataset????
-// rename CartoDbTable to CartoDbDataset????
-// rename CartoDbTable to CartoDbDataset????
-// rename CartoDbTable to CartoDbDataset????
-// rename CartoDbTable to CartoDbDataset????
-
-
 function createSelector( dataset )
 {
-    dataset.getLatestIndicatorKeys().forEach( function (column_name)
+    dataset.latestIndicatorKeys().forEach( function (key)
                 {
                     //             jQuery( '#measure-selector .top-level li' ).click( onCategoryClicked );
 
-                    var li_class = 'poverty-' + dataset.columnProperty(column_name, 'category');
+                    var li_class = 'poverty-' + dataset.getIndicatorCategory(key);
 
                     //             jQuery( '#measure-selector ul.' + li_class + 's' )
                     jQuery( '#measure-selector ul' )
                     .append(
                         jQuery('<li>')
-                        .attr( 'measure', dataset.columnProperty(column_name, 'name') )
+                        .attr( 'measure', dataset.getIndicatorName(key) )
                         .click( onMeasureClicked )
                         .addClass( li_class )
                         .append(
-                            jQuery( '<a>' + dataset.columnProperty(column_name, 'short_label') + '</a>' )
+                            jQuery( '<a>' + dataset.getMenuItemLabel(key) + '</a>' )
                         )
                     );
                 } );
 }
 
-function drawTable ( areanames, column )
+function drawTable ( indicator )
 {
     if ( table ) {
         // This fn is in the API docs but console says it does not exist.
@@ -251,26 +230,33 @@ function drawTable ( areanames, column )
 
     var is_displayable = function(x) { return x!=='' && x!==null; };
 
+//     var debug_countdown = 10;
+
     var config = {
-        data : areanames.data.map( function ( areaname, index ) {
-            return [
-                areaname,
-                // column.data[index] ? column.data[index]+column.unitsLabel : ''
-                is_displayable(column.data[index]) ? column.data[index]+column.unitsLabel : ''
+        data : indicator.geoNames.map( function ( geoname, index ) {
+            var result = [
+                geoname,
+                // indicator.data[index] ? indicator.data[index]+indicator.unitsLabel : ''
+                is_displayable(indicator.data[index]) ? ""+indicator.data[index]+indicator.unitsLabel : ''
             ];
+//             if ( debug_countdown > 0 ) {
+//                 console.debug( result );
+//                 debug_countdown -= 1;
+//             }
+            return result;
         } ),
         columns : [
             { title : "Local authority" },
-            { title : column.label }
+            { title : indicator.label }
         ],
         order : [[ 1, "desc" ]]
     };
 
-    if ( column.data.length <= 20 ) {
+    if ( indicator.data.length <= 20 ) {
         config.paging = false;                   // Turn off paging
         config.info = false;                     // Turn off paging info
         config.bFilter = false;                  // Turn off search
-        config.pageLength = column.data.length;  // Remove empty rows
+        config.pageLength = indicator.data.length;  // Remove empty rows
 
         // Colour the background of wider regional rows differently.
         config.rowCallback = function( row, data, index ) {
@@ -289,22 +275,22 @@ function drawTable ( areanames, column )
 // Once the various page elements have been created, set the initial measure
 // to be viewed. This may be in the URL. If not, choose a default.
 //
-function setInitialMeasure() {
+function setInitialIndicator() {
 
     // Does the URL indicate a measure to be shown?
     var indicator_id = getParameterFromQueryString( 'measure' );
     if ( indicator_id ) {
-        var column = allIndicators.column( indicator_id );
-        if ( column ) {
-            console.debug( ["Initialising with indicator found from query string", indicator_id, column] );
-            selectMeasure( column );
+        var indicator = allIndicators.indicator( indicator_id );
+        if ( indicator ) {
+            console.debug( ["Initialising with indicator found from query string", indicator_id, indicator] );
+            selectIndicator( indicator );
             return;
         }
     }
 
     // No measure indicated by URL. Use default.
     console.debug( "No indicator found from query string" );
-    selectMeasure( allIndicators[1] );
+    selectIndicator( allIndicators.indicator( allIndicators.latestIndicatorKeys()[0] ) );
 }
 
 function makePageElements( dataset )
@@ -322,7 +308,7 @@ function makePageElements( dataset )
     // only happens in one of two places, so a simple boolean flag is
     // enough to tell us when to try selecting the initial measure.
     if ( page_ready_for_measure_selection ) {
-        setInitialMeasure();
+        setInitialIndicator();
         //             selectCategory( 'poverty-' + columns[1].category + 's' );
     }
     else {
@@ -357,7 +343,7 @@ function createMap ( mapId )
         // only happens in one of two places, so a simple boolean flag is
         // enough to tell us when to try selecting the initial measure.
         if ( page_ready_for_measure_selection ) {
-            setInitialMeasure();
+            setInitialIndicator();
             //                 selectCategory( 'poverty-' + allIndicators[1].category + 's' );
         }
         else {
@@ -407,9 +393,11 @@ switch ( getParameterFromQueryString( 'level' ) )
     case 'lsoa':
         dataset_name = 'lsoamultiindicator';
         loadCartoDbDataset(
-            'lsoamultiindicator',
-            'lsoamultiindicator_columnmetadata2',
-            'indicator_property',
+            'indicators_geo2001_2016_04_05',
+            null,
+            null,
+//             'lsoamultiindicator_columnmetadata2',
+//             'indicator_property',
 //             function(dataset){console.debug(dataset);}
             function(carto_dataset){ makePageElements( new PovmonDataset(carto_dataset)); }
 //             makePageElements
