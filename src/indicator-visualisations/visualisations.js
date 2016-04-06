@@ -6,6 +6,7 @@ var table = null;
 var dataset_name = null;
 var page_ready_for_measure_selection = false;
 var povmon_iteration = "April 2016"
+var is_few_areas = undefined;
 
 function createChart( columns )
 {
@@ -72,10 +73,10 @@ function createChart( columns )
     } );
 }
 
-function getMapSql( column )
+function getMapSql( indicator )
 {
     return 'SELECT cartodb_id, ' + x_axis_name + ', the_geom, the_geom_webmercator, '
-    + column.name + " as indicator, '" + column.unitsLabel + "'as units FROM " + dataset_name + '_withboundaries';
+    + indicator.name() + " as indicator, '" + indicator.unitsLabel() + "'as units FROM " + dataset_name + '_withboundaries';
 }
 
 function getColourRampCss( colour, value )
@@ -134,7 +135,7 @@ text-placement-type: simple;   \n\
 
 function updateMapForMeasure( indicator )
 {
-    var show_labels = allIndicators.numRows() < 15 ? true : false;
+    var show_labels = is_few_areas;
 
     map.getLayers()[1].getSubLayers()[0].setSQL( getMapSql(indicator) );
     map.getLayers()[1].getSubLayers()[0].setCartoCSS( getMapCss(indicator.min(), indicator.max(), show_labels) );
@@ -236,8 +237,8 @@ function drawTable ( indicator )
         data : indicator.geoNames.map( function ( geoname, index ) {
             var result = [
                 geoname,
-                // indicator.data[index] ? indicator.data[index]+indicator.unitsLabel : ''
-                is_displayable(indicator.data[index]) ? ""+indicator.data[index]+indicator.unitsLabel : ''
+                // indicator.data[index] ? indicator.data[index]+indicator.unitsLabel() : ''
+                is_displayable(indicator.data[index]) ? indicator.data[index]+indicator.unitsLabel() : ''
             ];
 //             if ( debug_countdown > 0 ) {
 //                 console.debug( result );
@@ -299,7 +300,7 @@ function makePageElements( dataset )
 
     createSelector( dataset );
 
-    if ( dataset.numRows() < 15 ) {
+    if ( is_few_areas ) {
         createChart( dataset );
     }
 
@@ -392,20 +393,17 @@ switch ( getParameterFromQueryString( 'level' ) )
         break;
     case 'lsoa':
         dataset_name = 'lsoamultiindicator';
-        loadCartoDbDataset(
-            'indicators_geo2001_2016_04_05',
-            null,
-            null,
-//             'lsoamultiindicator_columnmetadata2',
-//             'indicator_property',
-//             function(dataset){console.debug(dataset);}
-            function(carto_dataset){ makePageElements( new PovmonDataset(carto_dataset)); }
-//             makePageElements
+        loadPovmonDataset(
+            ['indicators_geo2001_2016_04_05'],
+            null, //'indicator_metadata',
+            'iteration_metadata_2016_04_05',
+            function(povmon_dataset){ makePageElements( povmon_dataset ); }
         );
 //         CartoDbDataLoader.gimme( dataset_name, x_axis_name, makePageElements );
         jQuery( '#page-title' ).text( 'Lower layer super output areas' );
         //             jQuery( '#measure-selector .btn-group' )[1].remove();
-        createMap( 'a5053f5c-05f0-11e5-822d-0e4fddd5de28' );
+//         createMap( 'a5053f5c-05f0-11e5-822d-0e4fddd5de28' );
+        createMap( '76c26414-fbfc-11e5-a807-0e674067d321' );
         jQuery('#list-of-links').append('<li>You can see visualisations of all indicators at the <a href="/poverty-monitor/indicator-visualisations?level=local-authority-and-region">local authority level</a>.</li>');
         break;
     default:

@@ -155,7 +155,7 @@ function CartoDbDataset( raw_table ) {
 // CartoDB API request. The callback receives a single argument; an instance
 // of CartoDbDataset.
 //
-function loadCartoDbDataset( dataset_name, metadata_dataset_name, metadata_property_names_column_name, callback ) {
+function loadCartoDbDataset( dataset_name, callback ) {
 
     // Helper fn to execute an http request and trigger a callback on success.
     var getOnLoadFunction = function( requestHandler, params )
@@ -180,32 +180,9 @@ function loadCartoDbDataset( dataset_name, metadata_dataset_name, metadata_prope
     };
 
     // Pass the requested CartoDbDataset to the client-supplied callback.
-    var callClientCallback = function( metadata_request, data_request )
+    var callClientCallback = function( data_request )
     {
-        var result = new CartoDbDataset( JSON.parse( data_request.responseText ) );
-
-        if ( metadata_request ) {
-            result.addColumnProperties(
-                new CartoDbDataset( JSON.parse( metadata_request.responseText ) ),
-                metadata_property_names_column_name );
-        }
-
-        callback( result );
-    };
-
-    // Request metadata for the indicated metadata dataset.
-    var getMetadata = function( data_request )
-    {
-        if ( metadata_dataset_name ) {
-            //console.debug( arguments.callee.toString().split("\n")[0] );
-            var metadata_request = new XMLHttpRequest();
-            metadata_request.open( "GET", "https://gmpagdata.cartodb.com/api/v2/sql?q=SELECT%20*%20FROM%20" + metadata_dataset_name, true );
-            metadata_request.onload = getOnLoadFunction( callClientCallback, data_request );
-            metadata_request.send( null );
-        }
-        else {
-            callClientCallback( null, data_request );
-        }
+        callback( new CartoDbDataset( JSON.parse( data_request.responseText ) ) );
     };
 
     // Request the data for the indicated dataset
@@ -213,7 +190,7 @@ function loadCartoDbDataset( dataset_name, metadata_dataset_name, metadata_prope
         //console.debug( arguments.callee.toString().split("\n")[0] );
         var data_request = new XMLHttpRequest();
         data_request.open( "GET", "https://gmpagdata.cartodb.com/api/v2/sql?q=SELECT%20*%20FROM%20" + dataset_name + "%20ORDER%20BY%20cartodb_id", true );
-        data_request.onload = getOnLoadFunction( getMetadata );
+        data_request.onload = getOnLoadFunction( callClientCallback );
         data_request.send( null );
     };
 
