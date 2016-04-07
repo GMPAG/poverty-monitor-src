@@ -7,11 +7,13 @@ var table = null;
 var x_axis_name = 'geo_name';
 
 var detail_level = '';
-var is_few_areas = undefined;
 
 
-function createChart( columns )
+function createChart( dataset )
 {
+    // To do: The whole chart.
+    return;
+
     function getChartColumn( column ) {
         var result = column.data.slice();
         if ( column.x_axis ) {
@@ -24,7 +26,7 @@ function createChart( columns )
     }
 
     function getChartColumns() {
-        return columns.map( function ( col ) {
+        return dataset.map( function ( col ) {
             return getChartColumn( col );
         } );
     }
@@ -78,8 +80,8 @@ function createChart( columns )
 function getMapSql( indicator )
 {
     var sql = 'SELECT cartodb_id, geo_name, the_geom, the_geom_webmercator, '
-    + indicator.key + " as indicator, '" + indicator.unitsLabel() + "' as units FROM "
-    + indicator.datasetName + '_with_' + detail_level + '_boundaries';
+    + indicator.key + " as indicator, '" + indicator.unitsLabel + "' as units FROM "
+    + indicator.datasetName + '_with_' + detail_level + '_boundaries WHERE the_geom IS NOT NULL';
     console.debug(sql);
     return sql;
 }
@@ -113,9 +115,9 @@ text-name: [" + x_axis_name + "];   \n\
 text-face-name: 'DejaVu Sans Book';   \n\
 text-size: 14;   \n\
 text-label-position-tolerance: 10;   \n\
-text-fill: #333333;   \n\
-text-halo-fill: #ffdd88;   \n\
-text-halo-radius: 2;   \n\
+text-fill: #555;   \n\
+text-halo-fill: #fff;   \n\
+text-halo-radius: 1.5;   \n\
 text-dy: -10;   \n\
 text-allow-overlap: true;   \n\
 text-placement: point;   \n\
@@ -141,7 +143,7 @@ text-placement-type: simple;   \n\
 
 function updateMapForMeasure( indicator )
 {
-    var show_labels = is_few_areas;
+    var show_labels = detail_level == DetailLevel.LA;
 
     map.getLayers()[1].getSubLayers()[0].setSQL( getMapSql(indicator) );
     map.getLayers()[1].getSubLayers()[0].setCartoCSS( getMapCss(indicator.min(), indicator.max(), show_labels) );
@@ -242,19 +244,7 @@ function drawTable ( indicator )
     var config = {
         data : indicator.geoNames.map( function ( geoname, index ) {
 
-            var value = "";
-            if ( is_displayable(indicator.data[index]) ) {
-                value = indicator.data[index];
-                if ( indicator.unitsLabel().match( /^\w/ ) ) {
-                    // Units label starts with a word character,
-                    // i.e. it is not a symbol.
-                    // Leave a space.
-                    value += " ";
-                }
-                value += indicator.unitsLabel();
-            }
-
-            var result = [ geoname, value ];
+            var result = [ geoname, indicator.data[index] ];
 //             if ( debug_countdown > 0 ) {
 //                 console.debug( result );
 //                 debug_countdown -= 1;
@@ -331,7 +321,7 @@ function makePageElements( dataset )
 
     createSelector( dataset );
 
-    if ( is_few_areas ) {
+    if ( detail_level == DetailLevel.LA ) {
         createChart( dataset );
     }
 
@@ -381,38 +371,19 @@ function getParameterFromQueryString(name) {
 switch ( getParameterFromQueryString( 'level' ) )
 {
     case 'local-authority':
-        dataset_name = 'localauthoritymultiindicator';
-        CartoDbDataLoader.gimme( dataset_name, x_axis_name, makePageElements );
-        jQuery( '#page-title' ).text( 'Local authorities' );
-        createMap( '6d084fac-ef4a-11e4-96e6-0e0c41326911' );
-        jQuery('#list-of-links').append('<li>You can see visualisations of some of these indicators on a <a href="/poverty-monitor/indicator-visualisations?level=lsoa">much smaller scale</a>. (The smaller areas are called "Lower Super Output Areas".)</li>');
-        break;
     case 'local-authority-and-region':
-        dataset_name = 'localauthoritymultiindicator_rg';
-        CartoDbDataLoader.gimme( dataset_name, x_axis_name, makePageElements );
-        jQuery( '#page-title' ).text( 'Local authorities' );
-        createMap( '6d084fac-ef4a-11e4-96e6-0e0c41326911' );
-        jQuery('#list-of-links').append('<li>You can see visualisations of some of these indicators on a <a href="/poverty-monitor/indicator-visualisations?level=lsoa">much smaller scale</a>. (The smaller areas are called "Lower Super Output Areas".)</li>');
-        break;
     case 'region':
-        dataset_name = 'regionalmultiindicator';
-        CartoDbDataLoader.gimme( dataset_name, x_axis_name, makePageElements );
-        jQuery( '#page-title' ).text( 'Regions' );
-        jQuery('#map').remove();
-        jQuery('#list-of-links').append('<li>You can see visualisations of all indicators at the <a href="/poverty-monitor/indicator-visualisations?level=local-authority-and-region">local authority level</a>.</li>');
+        detail_level = DetailLevel.LA;
+        jQuery( '#page-title' ).text( 'Local authorities' );
         jQuery('#list-of-links').append('<li>You can see visualisations of some of these indicators on a <a href="/poverty-monitor/indicator-visualisations?level=lsoa">much smaller scale</a>. (The smaller areas are called "Lower Super Output Areas".)</li>');
+//         createMap( '6d084fac-ef4a-11e4-96e6-0e0c41326911' );
+        createMap( '60a322fc-fcad-11e5-8cd2-0e5db1731f59' );
         break;
     case 'lsoa':
         detail_level = DetailLevel.LSOA;
-        loadPovmonDataset(
-            ['indicators_geo2001_2016_04_05','indicators_geo2011_2016_04_05'],
-            'indicator_metadata_2016_04_05',
-            'iteration_metadata_2016_04_05',
-            function(povmon_dataset){ makePageElements( povmon_dataset ); }
-        );
         jQuery( '#page-title' ).text( 'Lower layer super output areas' );
-        createMap( '76c26414-fbfc-11e5-a807-0e674067d321' );
         jQuery('#list-of-links').append('<li>You can see visualisations of all indicators at the <a href="/poverty-monitor/indicator-visualisations?level=local-authority-and-region">local authority level</a>.</li>');
+        createMap( '60a322fc-fcad-11e5-8cd2-0e5db1731f59' );
         break;
     default:
         jQuery('#map').remove();
@@ -420,3 +391,10 @@ switch ( getParameterFromQueryString( 'level' ) )
         jQuery('#wrap .links').remove();
         jQuery('#page-title' ).text( 'Indicator level not found' );
 }
+
+loadPovmonDataset(
+    ['indicators_geo2001_2016_04_05','indicators_geo2011_2016_04_05'],
+    'indicator_metadata_2016_04_05',
+    'iteration_metadata_2016_04_05',
+    makePageElements
+);

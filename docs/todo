@@ -1,0 +1,14 @@
+To do:
+
+1) Add hovers to map
+
+2) Change basemap dynamically. labels above for lsoa, labels below for LA
+
+3) Remove indicators when there are only zero values at the relevant scale
+
+4) Make chart work
+
+5) Add title / label / whatever to table
+
+6) Make descriptions work
+

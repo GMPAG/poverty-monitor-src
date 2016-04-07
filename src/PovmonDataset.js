@@ -235,8 +235,17 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
         };
         result.unitsLabel = function() {
             var label = iterationProperty(key, "MEASUREUNIT_SYMBOL");
-            return label ? label : "";
-        };
+            if ( label ) {
+                if ( label.match( /^\w/ ) ) {
+                    // label starts with a word character, so put a space
+                    // in front of it.
+                    label = ' ' + label;
+                }
+            } else {
+                label = '';
+            }
+            return label;
+        }();
 
         return result;
     }
@@ -278,11 +287,11 @@ function loadPovmonDataset( carto_dataset_names, indicator_metadata_name, iterat
         }
     };
 
-    carto_dataset_names.forEach( function(dataset_name) {
+    carto_dataset_names.forEach( function(dataset_name, index) {
         loadCartoDbDataset(
             dataset_name,
             function(dataset) {
-                datasets.push(dataset);
+                datasets[index] = dataset;
                 onDatasetLoaded();
             }
         );
