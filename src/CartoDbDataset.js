@@ -182,7 +182,9 @@ function loadCartoDbDataset( dataset_name, callback ) {
     // Pass the requested CartoDbDataset to the client-supplied callback.
     var callClientCallback = function( data_request )
     {
-        callback( new CartoDbDataset( JSON.parse( data_request.responseText ) ) );
+        var dataset = new CartoDbDataset( JSON.parse( data_request.responseText ) );
+        dataset.name = dataset_name;
+        callback( dataset );
     };
 
     // Request the data for the indicated dataset

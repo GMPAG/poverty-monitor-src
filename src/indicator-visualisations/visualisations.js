@@ -1,12 +1,14 @@
 var allIndicators = null;
-var x_axis_name = 'areaname';
+
 var chart = null;
 var map = null;
 var table = null;
-var dataset_name = null;
-var page_ready_for_measure_selection = false;
-var povmon_iteration = "April 2016"
+
+var x_axis_name = 'geo_name';
+
+var map_scale = '';
 var is_few_areas = undefined;
+
 
 function createChart( columns )
 {
@@ -75,8 +77,11 @@ function createChart( columns )
 
 function getMapSql( indicator )
 {
-    return 'SELECT cartodb_id, ' + x_axis_name + ', the_geom, the_geom_webmercator, '
-    + indicator.name() + " as indicator, '" + indicator.unitsLabel() + "'as units FROM " + dataset_name + '_withboundaries';
+    var sql = 'SELECT cartodb_id, geo_name, the_geom, the_geom_webmercator, '
+    + indicator.key + " as indicator, '" + indicator.unitsLabel() + "' as units FROM "
+    + indicator.datasetName + '_with_' + map_scale + '_boundaries';
+    console.debug(sql);
+    return sql;
 }
 
 function getColourRampCss( colour, value )
@@ -127,6 +132,7 @@ text-placement-type: simple;   \n\
 
     colours.forEach( function ( colour ) {
         result += getColourRampCss( colour, val );
+        console.debug( {colour:colour,val:val} );
         val -= increment;
     } );
 
@@ -168,12 +174,12 @@ function updateSelectorForMeasure( indicator )
 
 function selectIndicator( indicator )
 {
-    jQuery( '#measure-name' ).text( indicator.label );
+    jQuery( '#measure-name' ).text( indicator.title );
 
     jQuery( '#description-link p' ).remove();
     jQuery( '#description-link' ).append(
         '<p>Read an <a href="/poverty-monitor/indicator-descriptions/?name='
-        + encodeURIComponent(indicator.descriptionPageTitle)
+        + encodeURIComponent(indicator.indicatorSlug)
         + '">explanation of this indicator</a>.</p>'  );
 
     updateSelectorForMeasure( indicator );
@@ -202,15 +208,15 @@ function createSelector( dataset )
                 {
                     //             jQuery( '#measure-selector .top-level li' ).click( onCategoryClicked );
 
-                    var li_class = 'poverty-' + dataset.getIndicatorCategory(key);
+//                     var li_class = 'poverty-' + dataset.getIndicatorCategory(key);
 
                     //             jQuery( '#measure-selector ul.' + li_class + 's' )
                     jQuery( '#measure-selector ul' )
                     .append(
                         jQuery('<li>')
-                        .attr( 'measure', dataset.getIndicatorName(key) )
+                        .attr( 'measure', key )
                         .click( onMeasureClicked )
-                        .addClass( li_class )
+//                         .addClass( li_class )
                         .append(
                             jQuery( '<a>' + dataset.getMenuItemLabel(key) + '</a>' )
                         )
@@ -235,11 +241,20 @@ function drawTable ( indicator )
 
     var config = {
         data : indicator.geoNames.map( function ( geoname, index ) {
-            var result = [
-                geoname,
-                // indicator.data[index] ? indicator.data[index]+indicator.unitsLabel() : ''
-                is_displayable(indicator.data[index]) ? indicator.data[index]+indicator.unitsLabel() : ''
-            ];
+
+            var value = "";
+            if ( is_displayable(indicator.data[index]) ) {
+                value = indicator.data[index];
+                if ( indicator.unitsLabel().match( /^\w/ ) ) {
+                    // Units label starts with a word character,
+                    // i.e. it is not a symbol.
+                    // Leave a space.
+                    value += " ";
+                }
+                value += indicator.unitsLabel();
+            }
+
+            var result = [ geoname, value ];
 //             if ( debug_countdown > 0 ) {
 //                 console.debug( result );
 //                 debug_countdown -= 1;
@@ -294,6 +309,18 @@ function setInitialIndicator() {
     selectIndicator( allIndicators.indicator( allIndicators.latestIndicatorKeys()[0] ) );
 }
 
+
+// HACK??? Asynchrous creation of map and other page elements means that
+// they could become ready in either order. Set initial indicator when
+// they are both complete.
+var callback_countdown = 2;
+function onCallbackComplete() {
+    callback_countdown--;
+    if ( callback_countdown == 0 ) {
+        setInitialIndicator();
+    }
+}
+
 function makePageElements( dataset )
 {
     allIndicators = dataset;
@@ -304,17 +331,7 @@ function makePageElements( dataset )
         createChart( dataset );
     }
 
-    // HACK: Asynchrous creation of map and other page elements means that
-    // they could become ready in either order. Initial measure selection
-    // only happens in one of two places, so a simple boolean flag is
-    // enough to tell us when to try selecting the initial measure.
-    if ( page_ready_for_measure_selection ) {
-        setInitialIndicator();
-        //             selectCategory( 'poverty-' + columns[1].category + 's' );
-    }
-    else {
-        page_ready_for_measure_selection = true;
-    }
+    onCallbackComplete();
 }
 
 function createMap ( mapId )
@@ -339,17 +356,7 @@ function createMap ( mapId )
             vis.getNativeMap().dragging.disable();
         }
 
-        // HACK: Asynchrous creation of map and other page elements means that
-        // they could become ready in either order. Initial measure selection
-        // only happens in one of two places, so a simple boolean flag is
-        // enough to tell us when to try selecting the initial measure.
-        if ( page_ready_for_measure_selection ) {
-            setInitialIndicator();
-            //                 selectCategory( 'poverty-' + allIndicators[1].category + 's' );
-        }
-        else {
-            page_ready_for_measure_selection = true;
-        }
+        onCallbackComplete();
     } );
 }
 
@@ -392,17 +399,14 @@ switch ( getParameterFromQueryString( 'level' ) )
         jQuery('#list-of-links').append('<li>You can see visualisations of some of these indicators on a <a href="/poverty-monitor/indicator-visualisations?level=lsoa">much smaller scale</a>. (The smaller areas are called "Lower Super Output Areas".)</li>');
         break;
     case 'lsoa':
-        dataset_name = 'lsoamultiindicator';
+        map_scale = 'lsoa';
         loadPovmonDataset(
-            ['indicators_geo2001_2016_04_05'],
-            null, //'indicator_metadata',
+            ['indicators_geo2001_2016_04_05','indicators_geo2011_2016_04_05'],
+            'indicator_metadata_2016_04_05',
             'iteration_metadata_2016_04_05',
             function(povmon_dataset){ makePageElements( povmon_dataset ); }
         );
-//         CartoDbDataLoader.gimme( dataset_name, x_axis_name, makePageElements );
         jQuery( '#page-title' ).text( 'Lower layer super output areas' );
-        //             jQuery( '#measure-selector .btn-group' )[1].remove();
-//         createMap( 'a5053f5c-05f0-11e5-822d-0e4fddd5de28' );
         createMap( '76c26414-fbfc-11e5-a807-0e674067d321' );
         jQuery('#list-of-links').append('<li>You can see visualisations of all indicators at the <a href="/poverty-monitor/indicator-visualisations?level=local-authority-and-region">local authority level</a>.</li>');
         break;

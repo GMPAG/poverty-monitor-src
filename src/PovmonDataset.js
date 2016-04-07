@@ -76,13 +76,15 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
                 return {
                     "data": column,
                     "geoCodes": datasets[i].column('geo_code'),
-                    "geoNames": datasets[i].column('geo_name')
+                    "geoNames": datasets[i].column('geo_name'),
+                    "datasetName": datasets[i].name
                 }
             }
         }
         return null;
     }
 
+    // Get a metadata property of a specific indicator iteration.
     var iterationProperty = function(key, property_name) {
         var prop_names = iteration_metadata.column( ITERATION_PROPERTY_NAMES_COLUMN_NAME );
         var index = prop_names.indexOf( property_name );
@@ -94,13 +96,15 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
         }
     }
 
+    // Get a metadata property of an indicator (applying to all iterations
+    // of that indicator.)
     var indicatorProperty = function(key, property_name) {
-        var prop_names = iteration_metadata.column( INDICATOR_PROPERTY_NAMES_COLUMN_NAME );
+        var prop_names = indicator_metadata.column( INDICATOR_PROPERTY_NAMES_COLUMN_NAME );
         var index = prop_names.indexOf( property_name );
         if ( index > -1 ) {
             var frags = getKeyFragments(key);
             if ( frags ) {
-                return iteration_metadata.column(frags.keyRoot)[index];
+                return indicator_metadata.column(frags.keyRoot)[index];
             }
         }
 
@@ -113,12 +117,16 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
         return ! hasNonZeroValues;
     }
 
+    // Split key into { keyRoot, iterationID } where keyRoot is the key for an
+    // indicator and iterationID identifies the iteration of that indicator.
+    //
     var getKeyFragments = function( key ) {
-            // All keys should be of the form blahblah_XXX where XXX is a 3 digit number
+
+            // ASSUMPTION: All keys should be of the form blahblah_XXX where XXX is a 3 digit number
             var frags = key.split(/_(\d{3})$/)
 
             // When I tested, there was an empty string at the end of the fragments.
-            // Get rid of empty strings in case they are implementation-dependent.
+            // Remove empty strings.
             frags = frags.filter(function(v){return v != "";});
 
             // Do we have the correct number of key fragments?
@@ -144,6 +152,7 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
         });
     }
 
+    // Get the keys for the latest iteration of each indicator.
     this.latestIndicatorKeys = function() {
         if ( ! latestIndicatorKeys ) {
             latestIndicatorKeys = getLatestIndicatorKeys();
@@ -151,23 +160,20 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
         return latestIndicatorKeys;
     }
 
-    this.getIndicatorCategory = function(iteration_key) {
-        // to do
-        return "to do: getIndicatorCategory()"
-    }
-    this.getIndicatorName = function(iteration_key) {
-        // to do
-        return "to do: getIndicatorName()"
-    }
+    // How to display the indicator name in a menu item.
     this.getMenuItemLabel = function(iteration_key) {
-        // to do
-        return "to do: getMenuItemLabel()"
+        return indicatorProperty( iteration_key, "Indicator" );
     }
 
+    // Get the data for a given indicator.
+    // The returned object includes the relevant geographical IDs as well as
+    // some utility functions.
     this.indicator = function(key) {
         var result = datasetColumn(key);
 
         if ( result != null ) {
+            result.key = key;
+            result.indicatorSlug = getKeyFragments(key).keyRoot;
             result.min = function() {
                 // ASSUMPTION: Falsey values are missing values, not zero.
                 // To do: WRONG assumption!!!
@@ -178,13 +184,13 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
                 // To do: WRONG assumption!!!
                 return Math.max.apply(null, this.data.filter(function(x){return x;}) );
             };
+            result.title = function() {
+                var title = indicatorProperty(key, "Indicator");
+                return title ? title : "";
+            };
             result.unitsLabel = function() {
                 var label = iterationProperty(key, "MEASUREUNIT_SYMBOL");
                 return label ? label : "";
-            };
-            result.name = function() {
-                //to do: get name from per-indicator metadata
-                return "to do - implement indicator.name()";
             };
         }
 
