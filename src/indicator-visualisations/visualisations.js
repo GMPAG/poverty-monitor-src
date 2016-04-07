@@ -6,7 +6,7 @@ var table = null;
 
 var x_axis_name = 'geo_name';
 
-var map_scale = '';
+var detail_level = '';
 var is_few_areas = undefined;
 
 
@@ -79,7 +79,7 @@ function getMapSql( indicator )
 {
     var sql = 'SELECT cartodb_id, geo_name, the_geom, the_geom_webmercator, '
     + indicator.key + " as indicator, '" + indicator.unitsLabel() + "' as units FROM "
-    + indicator.datasetName + '_with_' + map_scale + '_boundaries';
+    + indicator.datasetName + '_with_' + detail_level + '_boundaries';
     console.debug(sql);
     return sql;
 }
@@ -132,7 +132,7 @@ text-placement-type: simple;   \n\
 
     colours.forEach( function ( colour ) {
         result += getColourRampCss( colour, val );
-        console.debug( {colour:colour,val:val} );
+//         console.debug( {colour:colour,val:val} );
         val -= increment;
     } );
 
@@ -199,7 +199,7 @@ function onMeasureClicked(e)
 {
     selectIndicator(
         allIndicators.indicator(
-            jQuery(e.currentTarget).attr('measure') ) );
+            jQuery(e.currentTarget).attr('measure'), detail_level ) );
 }
 
 function createSelector( dataset )
@@ -296,7 +296,7 @@ function setInitialIndicator() {
     // Does the URL indicate a measure to be shown?
     var indicator_id = getParameterFromQueryString( 'measure' );
     if ( indicator_id ) {
-        var indicator = allIndicators.indicator( indicator_id );
+        var indicator = allIndicators.indicator( indicator_id, detail_level );
         if ( indicator ) {
             console.debug( ["Initialising with indicator found from query string", indicator_id, indicator] );
             selectIndicator( indicator );
@@ -306,7 +306,11 @@ function setInitialIndicator() {
 
     // No measure indicated by URL. Use default.
     console.debug( "No indicator found from query string" );
-    selectIndicator( allIndicators.indicator( allIndicators.latestIndicatorKeys()[0] ) );
+//     console.debug( detail_level );
+    selectIndicator( allIndicators.indicator(
+        allIndicators.latestIndicatorKeys()[0],
+        detail_level
+    ));
 }
 
 
@@ -399,7 +403,7 @@ switch ( getParameterFromQueryString( 'level' ) )
         jQuery('#list-of-links').append('<li>You can see visualisations of some of these indicators on a <a href="/poverty-monitor/indicator-visualisations?level=lsoa">much smaller scale</a>. (The smaller areas are called "Lower Super Output Areas".)</li>');
         break;
     case 'lsoa':
-        map_scale = 'lsoa';
+        detail_level = DetailLevel.LSOA;
         loadPovmonDataset(
             ['indicators_geo2001_2016_04_05','indicators_geo2011_2016_04_05'],
             'indicator_metadata_2016_04_05',

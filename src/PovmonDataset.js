@@ -1,10 +1,22 @@
-// CONSTANTS
+////////////
+// "CONSTANTS"
+//
+
+var DetailLevel = { LA:"la", LSOA:"lsoa" };
+var GeoCodeRanges = {};
+GeoCodeRanges[DetailLevel.LSOA] = { MIN: 'E01000000', MAX: 'E02000000' };
+GeoCodeRanges[DetailLevel.LA] = { MIN: 'E08000000', MAX: 'E80000000' };
 
 // NOTE: These column names are lower case because the import to CartoDB
-// changes column names to lower case. In the original spreadsheet I'm working from, the column names are in upper case.
+// changes column names to lower case. In the original spreadsheet I'm
+// working from, the column names are in upper case.
 var ITERATION_PROPERTY_NAMES_COLUMN_NAME = 'item';
 var INDICATOR_PROPERTY_NAMES_COLUMN_NAME = 'varname';
+var GEO_CODE_COLUMN_NAME = 'geo_code';
+var GEO_NAME_COLUMN_NAME = 'geo_name';
 
+//
+////////////
 
 
 function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
@@ -43,7 +55,7 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
                 iterations[frags.keyRoot] = [{"key":key, "iterationId":frags.iterationId}];
             }
         });
-        console.debug(iterations);
+//         console.debug(iterations);
 
         var result = [];
         for ( keyRoot in iterations ) {
@@ -58,27 +70,16 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
 
             result.push(latest.key);
         }
-        console.debug(result);
+//         console.debug(result);
 
         return result;
     }
 
-    // Get a data column and its relevant geo_codes and geo_names.
-    //
-    // We are dealing with multiple datasets and each one applies to a
-    // different set of geographic divisions, so we must make sure that any
-    // indicator values are bundled with the correct geographic divisions.
-    //
     var datasetColumn = function(key) {
         for ( var i = 0; i < datasets.length; i++ ) {
             var column = datasets[i].column(key);
             if (column) {
-                return {
-                    "data": column,
-                    "geoCodes": datasets[i].column('geo_code'),
-                    "geoNames": datasets[i].column('geo_name'),
-                    "datasetName": datasets[i].name
-                }
+                return column;
             }
         }
         return null;
@@ -113,7 +114,7 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
     }
 
     var isEmptyIteration = function( key ) {
-        var hasNonZeroValues = datasetColumn(key).data.some(function(v){return v!=0;});
+        var hasNonZeroValues = datasetColumn(key).some(function(v){return v!=0;});
         return ! hasNonZeroValues;
     }
 
@@ -135,6 +136,20 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
             } else {
                 return null;
             }
+    }
+
+    var datasetContainingColumn = function(key) {
+        for ( var i = 0; i < datasets.length; i++ ) {
+            if ( datasets[i].hasColumn(key) ) {
+                return datasets[i];
+            }
+        }
+        return null;
+    }
+
+    var codeInRange = function(detailLevel, code) {
+        return GeoCodeRanges[detailLevel].MIN <= code &&
+            code <= GeoCodeRanges[detailLevel].MAX;
     }
 
 
@@ -168,31 +183,60 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
     // Get the data for a given indicator.
     // The returned object includes the relevant geographical IDs as well as
     // some utility functions.
-    this.indicator = function(key) {
-        var result = datasetColumn(key);
+    this.indicator = function(key, detail_level) {
+//         console.debug( detail_level );
+        var dataset = datasetContainingColumn(key);
 
-        if ( result != null ) {
-            result.key = key;
-            result.indicatorSlug = getKeyFragments(key).keyRoot;
-            result.min = function() {
-                // ASSUMPTION: Falsey values are missing values, not zero.
-                // To do: WRONG assumption!!!
-                return Math.min.apply(null, this.data.filter(function(x){return x;}) );
-            };
-            result.max = function() {
-                // ASSUMPTION: Falsey values are missing values, not zero.
-                // To do: WRONG assumption!!!
-                return Math.max.apply(null, this.data.filter(function(x){return x;}) );
-            };
-            result.title = function() {
-                var title = indicatorProperty(key, "Indicator");
-                return title ? title : "";
-            };
-            result.unitsLabel = function() {
-                var label = iterationProperty(key, "MEASUREUNIT_SYMBOL");
-                return label ? label : "";
-            };
+        if ( ! dataset ) {
+            return null;
         }
+
+        var columns = {
+            data: dataset.column(key),
+            geoCodes: dataset.column(GEO_CODE_COLUMN_NAME),
+            geoNames: dataset.column(GEO_NAME_COLUMN_NAME)
+        };
+
+        var desired_indexes =
+            columns.geoCodes.map(
+                function(code, index) {
+                    if ( codeInRange( detail_level, code ) ) {
+                        return index;
+                    } else {
+                        return null;
+                    }
+                }
+            ).filter( function(index) { return index != null; }  );
+
+        var result = { data:[], geoCodes:[], geoNames:[] };
+
+        desired_indexes.forEach( function(index) {
+            result.data.push( columns.data[index] );
+            result.geoNames.push( columns.geoNames[index] );
+            result.geoCodes.push( columns.geoCodes[index] );
+        });
+
+        result.datasetName = dataset.name;
+        result.key = key;
+        result.indicatorSlug = getKeyFragments(key).keyRoot;
+        result.min = function() {
+            // ASSUMPTION: Falsey values are missing values, not zero.
+            // To do: WRONG assumption!!!
+            return Math.min.apply(null, this.data.filter(function(x){return x;}) );
+        };
+        result.max = function() {
+            // ASSUMPTION: Falsey values are missing values, not zero.
+            // To do: WRONG assumption!!!
+            return Math.max.apply(null, this.data.filter(function(x){return x;}) );
+        };
+        result.title = function() {
+            var title = indicatorProperty(key, "Indicator");
+            return title ? title : "";
+        };
+        result.unitsLabel = function() {
+            var label = iterationProperty(key, "MEASUREUNIT_SYMBOL");
+            return label ? label : "";
+        };
 
         return result;
     }
