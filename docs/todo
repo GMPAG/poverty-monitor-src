@@ -6,9 +6,10 @@ To do:
 
 3) Remove indicators when there are only zero values at the relevant scale
 
-4) Make chart work
+4) Make chart work - DONE!!!
 
 5) Add title / label / whatever to table
 
 6) Make descriptions work
 
+7) Redefine chloropleth around average - DONE by excluding big things.

@@ -92,7 +92,7 @@ polygon-fill: ' + colour + ';  \n\
 }';
 }
 
-function getMapCss( min_val, max_val, show_labels )
+function getMapCss( indicator, show_labels )
 {
     var result = "\n\
 /** choropleth visualization */   \n\
@@ -127,13 +127,31 @@ text-placement-type: simple;   \n\
     var colours =
         [ '#B10026', '#E31A1C', '#FC4E2A', '#FD8D3C', '#FEB24C', '#FED976', '#FFFFB2' ];
 
-    var val = max_val;
-    var increment = ( max_val - min_val ) / colours.length;
 
-    colours.forEach( function ( colour ) {
-        result += getColourRampCss( colour, val );
-//         console.debug( {colour:colour,val:val} );
-        val -= increment;
+    var getSteps = function( min, max, num_steps ) {
+        var result = []
+        for ( var v = max, i = 0; i < num_steps; i++, v -= (max-min)/num_steps ) {
+            result.push(v);
+            console.debug(v);
+        }
+        return result;
+    }
+
+    // Remove big things from the data. They will not be shown on the map.
+    var data = indicator.data.filter( function(val, index) {
+        return ! geoCodeInRange( DetailLevel.BIG, indicator.geoCodes[index] );
+    });
+
+    var min = Math.min.apply(null, data);
+    var max = Math.max.apply(null, data);
+    var vals = getSteps( min, max, colours.length )
+
+    colours.forEach( function ( colour, index ) {
+        var val = vals[index];
+        var colourCSS = getColourRampCss( colour, val );
+        console.debug( {colour:colour, val:val} );
+        console.debug( colourCSS );
+        result += colourCSS;
     } );
 
     return result;
@@ -144,7 +162,7 @@ function updateMapForMeasure( indicator )
     var show_labels = detail_level == DetailLevel.LA;
 
     map.getLayers()[1].getSubLayers()[0].setSQL( getMapSql(indicator) );
-    map.getLayers()[1].getSubLayers()[0].setCartoCSS( getMapCss(indicator.min(), indicator.max(), show_labels) );
+    map.getLayers()[1].getSubLayers()[0].setCartoCSS( getMapCss(indicator, show_labels) );
 
     jQuery( '.cartodb-legend-stack .min' ).text( indicator.min()+indicator.unitsLabel );
     jQuery( '.cartodb-legend-stack .max' ).text( indicator.max()+indicator.unitsLabel );

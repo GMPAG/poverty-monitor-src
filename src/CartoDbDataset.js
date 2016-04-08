@@ -98,44 +98,44 @@ function CartoDbDataset( raw_table ) {
         return result;
     }
 
-    this.columnPropertyValue = function( column_name, property_name ) {
-        return columnsMetadata[column_name][property_name];
-    }
+//     this.columnPropertyValue = function( column_name, property_name ) {
+//         return columnsMetadata[column_name][property_name];
+//     }
 
-    // Given a CartoDbDataset containing column-metadata and the name of the
-    // column in that dataset that contains the property names for that
-    // metadata, add the relevant column properties to the current
-    // table.
-    //
-    this.addColumnProperties = function( metadata_table, property_names_column_name ) {
+//     // Given a CartoDbDataset containing column-metadata and the name of the
+//     // column in that dataset that contains the property names for that
+//     // metadata, add the relevant column properties to the current
+//     // table.
+//     //
+//     this.addColumnProperties = function( metadata_table, property_names_column_name ) {
 
-        if ( ! metadata_table.hasColumn(property_names_column_name) ) {
-            console.error( "Invalid column name (" + property_names_column_name + ") given for metdata property names." );
-            return;
-        }
+//         if ( ! metadata_table.hasColumn(property_names_column_name) ) {
+//             console.error( "Invalid column name (" + property_names_column_name + ") given for metdata property names." );
+//             return;
+//         }
 
-        var property_names = metadata_table.column(property_names_column_name);
+//         var property_names = metadata_table.column(property_names_column_name);
 
-        // For each data table column
-        this.userDefinedColumnNames().forEach( function(column_name) {
+//         // For each data table column
+//         this.userDefinedColumnNames().forEach( function(column_name) {
 
-            // The extra metadata table need not contain metadata for every
-            // column in the data table, so check whether the current column
-            // is included in the metadata.
-            if ( metadata_table.hasColumn(column_name) ) {
+//             // The extra metadata table need not contain metadata for every
+//             // column in the data table, so check whether the current column
+//             // is included in the metadata.
+//             if ( metadata_table.hasColumn(column_name) ) {
 
-                property_names.forEach( function(property_name, i) {
-                    columnsMetadata[column_name][property_name] = metadata_table.value(i, column_name)
-                });
-            }
-        });
-    }
+//                 property_names.forEach( function(property_name, i) {
+//                     columnsMetadata[column_name][property_name] = metadata_table.value(i, column_name)
+//                 });
+//             }
+//         });
+//     }
 
-    this.getColumnNamesByColumnProperty = function( property_name, property_value ) {
-        return Object.keys(columnsMetadata).filter( function ( column_name ) {
-            return that.columnPropertyValue(column_name, property_name) == property_value;
-        });
-    }
+//     this.getColumnNamesByColumnProperty = function( property_name, property_value ) {
+//         return Object.keys(columnsMetadata).filter( function ( column_name ) {
+//             return that.columnPropertyValue(column_name, property_name) == property_value;
+//         });
+//     }
 }
 
 

@@ -2,10 +2,11 @@
 // "CONSTANTS"
 //
 
-var DetailLevel = { LA:"la", LSOA:"lsoa" };
+var DetailLevel = { LA:"la", LSOA:"lsoa", BIG:"big" };
 var GeoCodeRanges = {};
 GeoCodeRanges[DetailLevel.LSOA] = { MIN: 'E01000000', MAX: 'E02000000' };
-GeoCodeRanges[DetailLevel.LA] = { MIN: 'E08000000', MAX: 'E80000000' };
+GeoCodeRanges[DetailLevel.LA] = { MIN: 'E08000000', MAX: 'E99999999' };
+GeoCodeRanges[DetailLevel.BIG] = { MIN: 'E09000000', MAX: 'E99999999' };
 
 // NOTE: These column names are lower case because the import to CartoDB
 // changes column names to lower case. In the original spreadsheet I'm
@@ -17,6 +18,14 @@ var GEO_NAME_COLUMN_NAME = 'geo_name';
 
 //
 ////////////
+
+
+
+var geoCodeInRange = function(detailLevel, code) {
+    return GeoCodeRanges[detailLevel].MIN <= code &&
+        code <= GeoCodeRanges[detailLevel].MAX;
+}
+
 
 
 function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
@@ -147,12 +156,6 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
         return null;
     }
 
-    var codeInRange = function(detailLevel, code) {
-        return GeoCodeRanges[detailLevel].MIN <= code &&
-            code <= GeoCodeRanges[detailLevel].MAX;
-    }
-
-
     ////// Privileged ///////
 
     this.allIndicatorKeys = function() {
@@ -200,7 +203,7 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
         var desired_indexes =
             columns.geoCodes.map(
                 function(code, index) {
-                    if ( codeInRange( detail_level, code ) ) {
+                    if ( geoCodeInRange( detail_level, code ) ) {
                         return index;
                     } else {
                         return null;
