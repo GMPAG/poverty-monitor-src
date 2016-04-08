@@ -20,16 +20,25 @@ function createChart( dataset )
         var indicators = keys.map( function(key) {
             return dataset.indicator(key, chart_detail_level);
         });
+
         var columns = indicators.map( function(indicator) {
-            return [ indicator.key ].concat( indicator.data );
+            return [ indicator.key ].concat(
+                indicator.data.filter(function (value, index) {
+                    return ! geoCodeInRange( DetailLevel.BIG, indicator.geoCodes[index] );
+                })
+            );
         });
 
         // Add the geographical names as the first column.
-        columns.unshift( [ x_axis_id ].concat( indicators[0].geoNames ) );
+        columns.unshift( [ x_axis_id ].concat(
+            indicators[0].geoNames.filter(function (name, index) {
+                    return ! geoCodeInRange( DetailLevel.BIG, indicators[0].geoCodes[index] );
+            })
+        ));
+
         return columns;
     }
     var columns = getChartColumns();
-    console.debug( columns );
 
     chart = c3.generate( {
         bindto: '#chart',
@@ -132,7 +141,6 @@ text-placement-type: simple;   \n\
         var result = []
         for ( var v = max, i = 0; i < num_steps; i++, v -= (max-min)/num_steps ) {
             result.push(v);
-            console.debug(v);
         }
         return result;
     }
@@ -149,8 +157,6 @@ text-placement-type: simple;   \n\
     colours.forEach( function ( colour, index ) {
         var val = vals[index];
         var colourCSS = getColourRampCss( colour, val );
-        console.debug( {colour:colour, val:val} );
-        console.debug( colourCSS );
         result += colourCSS;
     } );
 
