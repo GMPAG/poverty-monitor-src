@@ -4,12 +4,21 @@ To do:
 
 2) Change basemap dynamically. labels above for lsoa, labels below for LA
 
-3) Remove indicators when there are only zero values at the relevant scale
+3) Remove indicators when there are only zero values at the relevant scale - DONE!!!
 
 4) Make chart work - DONE!!!
 
-5) Add title / label / whatever to table
+5) Add title / label / whatever to table - DONE!!!
 
 6) Make descriptions work
 
-7) Redefine chloropleth around average - DONE by excluding big things.
+7) Redefine chloropleth around average - DONE!!! by excluding big things.
+
+8) Add landing page and menu items
+
+9) Reskin for new site
+
+
+Idea: Accept a range of detail levels in PovmonDataset interface. This allows
+client code to choose LA versus LA+BIG without having to filter out unwanted
+stuff afterwards.

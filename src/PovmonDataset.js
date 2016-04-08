@@ -37,14 +37,14 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
 
     // Not calculating latestIndicatorKeys immediately, because doing so
     // requires access to member functions that are not yet defined.
-    var latestIndicatorKeys = null;
+    var latestIndicatorKeys = {};
 
-    var getLatestIndicatorKeys = function() {
+    var getLatestIndicatorKeys = function( detail_level ) {
 
         var iterations = {};
         that.allIndicatorKeys().forEach( function(key) {
 
-            if ( isEmptyIteration(key) ) {
+            if ( isEmptyIteration(key, detail_level) ) {
                 // Don't consider using this iteration of the indicator. It has no data.
                 return;
             }
@@ -122,8 +122,12 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
         return null
     }
 
-    var isEmptyIteration = function( key ) {
-        var hasNonZeroValues = datasetColumn(key).some(function(v){return v!=0;});
+    var isEmptyIteration = function( key, detail_level ) {
+        var dataset = datasetContainingColumn(key);
+        var geo_codes = dataset.column('geo_code');
+        var hasNonZeroValues = dataset.column(key).some(function(value, index){
+            return value !=0  &&  geoCodeInRange(detail_level, geo_codes[index]);
+        });
         return ! hasNonZeroValues;
     }
 
@@ -171,11 +175,11 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
     }
 
     // Get the keys for the latest iteration of each indicator.
-    this.latestIndicatorKeys = function() {
-        if ( ! latestIndicatorKeys ) {
-            latestIndicatorKeys = getLatestIndicatorKeys();
+    this.latestIndicatorKeys = function(detail_level) {
+        if ( ! latestIndicatorKeys[detail_level] ) {
+            latestIndicatorKeys[detail_level] = getLatestIndicatorKeys(detail_level);
         }
-        return latestIndicatorKeys;
+        return latestIndicatorKeys[detail_level];
     }
 
     // How to display the indicator name in a menu item.

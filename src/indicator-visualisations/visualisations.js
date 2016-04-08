@@ -16,7 +16,7 @@ function createChart( dataset )
     var chart_detail_level = DetailLevel.LA;
 
     function getChartColumns() {
-        var keys = dataset.latestIndicatorKeys();
+        var keys = dataset.latestIndicatorKeys( detail_level );
         var indicators = keys.map( function(key) {
             return dataset.indicator(key, chart_detail_level);
         });
@@ -228,7 +228,7 @@ function onMeasureClicked(e)
 
 function createSelector( dataset )
 {
-    dataset.latestIndicatorKeys().forEach( function (key)
+    dataset.latestIndicatorKeys(detail_level).forEach( function (key)
                 {
                     //             jQuery( '#measure-selector .top-level li' ).click( onCategoryClicked );
 
@@ -320,7 +320,7 @@ function setInitialIndicator() {
     console.debug( "No indicator found from query string" );
 //     console.debug( detail_level );
     selectIndicator( povmon_dataset.indicator(
-        povmon_dataset.latestIndicatorKeys()[0],
+        povmon_dataset.latestIndicatorKeys(detail_level)[0],
         detail_level
     ));
 }
