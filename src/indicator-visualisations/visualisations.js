@@ -274,8 +274,8 @@ function drawTable ( indicator )
             return result;
         } ),
         columns : [
-            { title : "Local authority" },
-            { title : indicator.label }
+            { title : "Area" },
+            { title : indicator.title() }
         ],
         order : [[ 1, "desc" ]]
     };
