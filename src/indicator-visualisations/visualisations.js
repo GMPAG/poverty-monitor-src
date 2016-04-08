@@ -1,4 +1,4 @@
-var allIndicators = null;
+var povmon_dataset = null;
 
 var chart = null;
 var map = null;
@@ -11,27 +11,25 @@ var detail_level = '';
 
 function createChart( dataset )
 {
-    // To do: The whole chart.
-    return;
-
-    function getChartColumn( column ) {
-        var result = column.data.slice();
-        if ( column.x_axis ) {
-            result.unshift( x_axis_name );
-        }
-        else {
-            result.unshift( column.label );
-        }
-        return result;
-    }
+    var x_axis_id = 'geoname';
+    var x_axis_title = 'Local authority';
+    var chart_detail_level = DetailLevel.LA;
 
     function getChartColumns() {
-        return dataset.map( function ( col ) {
-            return getChartColumn( col );
-        } );
-    }
+        var keys = dataset.latestIndicatorKeys();
+        var indicators = keys.map( function(key) {
+            return dataset.indicator(key, chart_detail_level);
+        });
+        var columns = indicators.map( function(indicator) {
+            return [ indicator.key ].concat( indicator.data );
+        });
 
-    var chart_columns = getChartColumns();
+        // Add the geographical names as the first column.
+        columns.unshift( [ x_axis_id ].concat( indicators[0].geoNames ) );
+        return columns;
+    }
+    var columns = getChartColumns();
+    console.debug( columns );
 
     chart = c3.generate( {
         bindto: '#chart',
@@ -39,17 +37,17 @@ function createChart( dataset )
             height: 400
         },
         data: {
-            x: x_axis_name,
-            columns: chart_columns,
+            x: x_axis_id,
+            columns: columns,
             type: 'bar',
-            // Hide all columns except the first.
-            hide: chart_columns.slice(2).map( function(col) {return col[0];} )
+            // Hide all columns except x and first data column.
+            hide: columns.slice(2).map( function(col) {return col[0];} )
         },
         axis: {
             x: {
                 type: 'category',
                 label: {
-                    text: 'Local Authority',
+                    text: x_axis_title,
                     position: 'outer-center'
                 }
                 ,
@@ -156,7 +154,7 @@ function updateChartForMeasure( indicator )
 {
     chart.hide();
     chart.axis.labels( { y: indicator.unitsLabel } );
-    chart.show( indicator.label );
+    chart.show( indicator.key );
 }
 
 //     function selectCategory( category )
@@ -200,7 +198,7 @@ function selectIndicator( indicator )
 function onMeasureClicked(e)
 {
     selectIndicator(
-        allIndicators.indicator(
+        povmon_dataset.indicator(
             jQuery(e.currentTarget).attr('measure'), detail_level ) );
 }
 
@@ -286,7 +284,7 @@ function setInitialIndicator() {
     // Does the URL indicate a measure to be shown?
     var indicator_id = getParameterFromQueryString( 'measure' );
     if ( indicator_id ) {
-        var indicator = allIndicators.indicator( indicator_id, detail_level );
+        var indicator = povmon_dataset.indicator( indicator_id, detail_level );
         if ( indicator ) {
             console.debug( ["Initialising with indicator found from query string", indicator_id, indicator] );
             selectIndicator( indicator );
@@ -297,8 +295,8 @@ function setInitialIndicator() {
     // No measure indicated by URL. Use default.
     console.debug( "No indicator found from query string" );
 //     console.debug( detail_level );
-    selectIndicator( allIndicators.indicator(
-        allIndicators.latestIndicatorKeys()[0],
+    selectIndicator( povmon_dataset.indicator(
+        povmon_dataset.latestIndicatorKeys()[0],
         detail_level
     ));
 }
@@ -317,7 +315,7 @@ function onCallbackComplete() {
 
 function makePageElements( dataset )
 {
-    allIndicators = dataset;
+    povmon_dataset = dataset;
 
     createSelector( dataset );
 
