@@ -204,6 +204,7 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
             geoNames: dataset.column(GEO_NAME_COLUMN_NAME)
         };
 
+        // Get the indexes of those rows relevant to the requested detail level
         var desired_indexes =
             columns.geoCodes.map(
                 function(code, index) {
@@ -217,15 +218,19 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
 
         var result = { data:[], geoCodes:[], geoNames:[] };
 
+        // Get the rows relevant to the requested detail level.
         desired_indexes.forEach( function(index) {
             result.data.push( columns.data[index] );
             result.geoNames.push( columns.geoNames[index] );
             result.geoCodes.push( columns.geoCodes[index] );
         });
 
+        // Add other data and functions to the indicator.
         result.datasetName = dataset.name;
+        result.detailLevel = detail_level;
         result.key = key;
         result.indicatorSlug = getKeyFragments(key).keyRoot;
+
         result.min = function() {
             // ASSUMPTION: Falsey values are missing values, not zero.
             // To do: WRONG assumption!!!
@@ -236,10 +241,14 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
             // To do: WRONG assumption!!!
             return Math.max.apply(null, this.data.filter(function(x){return x;}) );
         };
+
+        // NOTE: Not a function. We immediately call the anon fn to get a value
         result.title = function() {
             var title = indicatorProperty(key, "Indicator");
             return title ? title : "";
-        };
+        }();
+
+        // NOTE: Not a function. We immediately call the anon fn to get a value
         result.unitsLabel = function() {
             var label = iterationProperty(key, "MEASUREUNIT_SYMBOL");
             if ( label ) {

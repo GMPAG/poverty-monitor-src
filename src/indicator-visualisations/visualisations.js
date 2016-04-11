@@ -22,7 +22,7 @@ function createChart( dataset )
         });
 
         var columns = indicators.map( function(indicator) {
-            return [ indicator.key ].concat(
+            return [ indicator.title ].concat(
                 indicator.data.filter(function (value, index) {
                     return ! geoCodeInRange( DetailLevel.BIG, indicator.geoCodes[index] );
                 })
@@ -88,7 +88,7 @@ function getMapSql( indicator )
 {
     var sql = 'SELECT cartodb_id, geo_name, the_geom, the_geom_webmercator, '
     + indicator.key + " as indicator, '" + indicator.unitsLabel + "' as units FROM "
-    + indicator.datasetName + '_with_' + detail_level + '_boundaries WHERE the_geom IS NOT NULL';
+    + indicator.datasetName + '_with_' + indicator.detailLevel + '_boundaries WHERE the_geom IS NOT NULL';
     console.debug(sql);
     return sql;
 }
@@ -101,7 +101,7 @@ polygon-fill: ' + colour + ';  \n\
 }';
 }
 
-function getMapCss( indicator, show_labels )
+function getMapCss( min, max, show_labels )
 {
     var result = "\n\
 /** choropleth visualization */   \n\
@@ -136,7 +136,6 @@ text-placement-type: simple;   \n\
     var colours =
         [ '#B10026', '#E31A1C', '#FC4E2A', '#FD8D3C', '#FEB24C', '#FED976', '#FFFFB2' ];
 
-
     var getSteps = function( min, max, num_steps ) {
         var result = []
         for ( var v = max, i = 0; i < num_steps; i++, v -= (max-min)/num_steps ) {
@@ -145,13 +144,6 @@ text-placement-type: simple;   \n\
         return result;
     }
 
-    // Remove big things from the data. They will not be shown on the map.
-    var data = indicator.data.filter( function(val, index) {
-        return ! geoCodeInRange( DetailLevel.BIG, indicator.geoCodes[index] );
-    });
-
-    var min = Math.min.apply(null, data);
-    var max = Math.max.apply(null, data);
     var vals = getSteps( min, max, colours.length )
 
     colours.forEach( function ( colour, index ) {
@@ -165,20 +157,28 @@ text-placement-type: simple;   \n\
 
 function updateMapForMeasure( indicator )
 {
-    var show_labels = detail_level == DetailLevel.LA;
+    var show_labels = indicator.detailLevel == DetailLevel.LA;
 
     map.getLayers()[1].getSubLayers()[0].setSQL( getMapSql(indicator) );
-    map.getLayers()[1].getSubLayers()[0].setCartoCSS( getMapCss(indicator, show_labels) );
 
-    jQuery( '.cartodb-legend-stack .min' ).text( indicator.min()+indicator.unitsLabel );
-    jQuery( '.cartodb-legend-stack .max' ).text( indicator.max()+indicator.unitsLabel );
+    // Remove big things from the data. They will not be shown on the map.
+    var data = indicator.data.filter( function(val, index) {
+        return ! geoCodeInRange( DetailLevel.BIG, indicator.geoCodes[index] );
+    });
+    var min = Math.min.apply(null, data);
+    var max = Math.max.apply(null, data);
+
+    map.getLayers()[1].getSubLayers()[0].setCartoCSS( getMapCss(min, max, show_labels) );
+
+    jQuery( '.cartodb-legend-stack .min' ).text( min + indicator.unitsLabel );
+    jQuery( '.cartodb-legend-stack .max' ).text( max + indicator.unitsLabel );
 }
 
 function updateChartForMeasure( indicator )
 {
     chart.hide();
     chart.axis.labels( { y: indicator.unitsLabel } );
-    chart.show( indicator.key );
+    chart.show( indicator.title );
 }
 
 //     function selectCategory( category )
@@ -275,7 +275,7 @@ function drawTable ( indicator )
         } ),
         columns : [
             { title : "Area" },
-            { title : indicator.title() }
+            { title : indicator.title }
         ],
         order : [[ 1, "desc" ]]
     };
@@ -387,6 +387,14 @@ function getParameterFromQueryString(name) {
     return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
+function loadData() {
+    loadPovmonDataset(
+        ['indicators_geo2001_2016_04_05','indicators_geo2011_2016_04_05'],
+        'indicator_metadata_2016_04_05',
+        'iteration_metadata_2016_04_05',
+        makePageElements
+    );
+}
 
 // And go...
 
@@ -398,14 +406,15 @@ switch ( getParameterFromQueryString( 'level' ) )
         detail_level = DetailLevel.LA;
         jQuery( '#page-title' ).text( 'Local authorities' );
         jQuery('#list-of-links').append('<li>You can see visualisations of some of these indicators on a <a href="/poverty-monitor/indicator-visualisations?level=lsoa">much smaller scale</a>. (The smaller areas are called "Lower Super Output Areas".)</li>');
-//         createMap( '6d084fac-ef4a-11e4-96e6-0e0c41326911' );
         createMap( '60a322fc-fcad-11e5-8cd2-0e5db1731f59' );
+        loadData();
         break;
     case 'lsoa':
         detail_level = DetailLevel.LSOA;
         jQuery( '#page-title' ).text( 'Lower layer super output areas' );
         jQuery('#list-of-links').append('<li>You can see visualisations of all indicators at the <a href="/poverty-monitor/indicator-visualisations?level=local-authority-and-region">local authority level</a>.</li>');
-        createMap( '60a322fc-fcad-11e5-8cd2-0e5db1731f59' );
+        createMap( 'b7ee5b22-fff9-11e5-b060-0e3ff518bd15' );
+        loadData();
         break;
     default:
         jQuery('#map').remove();
@@ -414,9 +423,4 @@ switch ( getParameterFromQueryString( 'level' ) )
         jQuery('#page-title' ).text( 'Indicator level not found' );
 }
 
-loadPovmonDataset(
-    ['indicators_geo2001_2016_04_05','indicators_geo2011_2016_04_05'],
-    'indicator_metadata_2016_04_05',
-    'iteration_metadata_2016_04_05',
-    makePageElements
-);
+

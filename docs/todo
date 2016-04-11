@@ -1,24 +1,32 @@
 To do:
 
-1) Add hovers to map
+Add hovers to map
 
-2) Change basemap dynamically. labels above for lsoa, labels below for LA
+Make descriptions work
 
-3) Remove indicators when there are only zero values at the relevant scale - DONE!!!
+Add landing page and menu items
 
-4) Make chart work - DONE!!!
-
-5) Add title / label / whatever to table - DONE!!!
-
-6) Make descriptions work
-
-7) Redefine chloropleth around average - DONE!!! by excluding big things.
-
-8) Add landing page and menu items
-
-9) Reskin for new site
+Reskin for new site
 
 
-Idea: Accept a range of detail levels in PovmonDataset interface. This allows
+Ideas:
+
+Accept a range of detail levels in PovmonDataset interface. This allows
 client code to choose LA versus LA+BIG without having to filter out unwanted
 stuff afterwards.
+
+
+Done:
+
+Redefine chloropleth around average - DONE!!! by excluding big things.
+
+Remove indicators when there are only zero values at the relevant scale - DONE!!!
+
+Make chart work - DONE!!!
+
+Add title / label / whatever to table - DONE!!!
+
+Change basemap dynamically. labels above for lsoa, labels below for LA - DONE!!! by using two different static maps.
+
+
+
