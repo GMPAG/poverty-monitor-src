@@ -132,7 +132,6 @@ class View < Mustache
     <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.js"></script>
     <script src="http://libs.cartocdn.com/cartodb.js/v3/3.13/cartodb.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.7/js/jquery.dataTables.min.js"></script>
-    <script src="../CartoDbDataLoader.js"></script>
     <script src="../CartoDbDataset.js"></script>
     <script src="../PovmonDataset.js"></script>
     <script src="visualisations.js"></script>
@@ -163,8 +162,7 @@ class View < Mustache
     def add_all_desc_scripts context
         context[:scripts] = %q~
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-    <script src="../../CartoDbDataLoader.js"></script>
-    <script src="../../GoogleDataLoader.js"></script>
+    <script src="../../CartoDbDataset.js"></script>
     <script src="all-descriptions.js"></script>
 ~
     end

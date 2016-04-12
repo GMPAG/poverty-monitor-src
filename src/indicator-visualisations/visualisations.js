@@ -8,6 +8,14 @@ var x_axis_name = 'geo_name';
 
 var detail_level = '';
 
+// Not all platforms implement a javascript console.
+if ( ! console ) {
+    console = {
+        debug:function(){},
+        warn:function(){},
+        error:function(){}
+    };
+}
 
 function createChart( dataset )
 {
@@ -306,18 +314,25 @@ function drawTable ( indicator )
 function setInitialIndicator() {
 
     // Does the URL indicate a measure to be shown?
-    var indicator_id = getParameterFromQueryString( 'measure' );
-    if ( indicator_id ) {
-        var indicator = povmon_dataset.indicator( indicator_id, detail_level );
+    var iteration_key = getParameterFromQueryString( 'measure' );
+    if ( iteration_key ) {
+
+        // TO DO:
+        // Currently we are expecting an iteration key in the query string,
+        // BUT we are more likely to get an indicator key or an indicator
+        // name. We need to add a fn to the PovmonDataset to obtain the
+        // latest iteration of a given indicator.
+
+        var indicator = povmon_dataset.indicator( iteration_key, detail_level );
         if ( indicator ) {
-            console.debug( ["Initialising with indicator found from query string", indicator_id, indicator] );
+            console.debug( ["Initialising with indicator found from query string", iteration_key, indicator] );
             selectIndicator( indicator );
             return;
         }
     }
 
     // No measure indicated by URL. Use default.
-    console.debug( "No indicator found from query string" );
+    console.debug( 'No valid indicator ("' + iteration_key + '") found from query string' );
 //     console.debug( detail_level );
     selectIndicator( povmon_dataset.indicator(
         povmon_dataset.latestIndicatorKeys(detail_level)[0],
