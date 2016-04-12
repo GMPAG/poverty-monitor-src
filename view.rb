@@ -144,7 +144,7 @@ class View < Mustache
     def add_desc_scripts context
         context[:scripts] = %q~
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-    <script src="../GoogleDataLoader.js"></script>
+    <script src="../CartoDbDataset.js"></script>
     <script src="descriptions.js"></script>
 ~
     end

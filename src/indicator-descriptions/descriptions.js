@@ -2,9 +2,26 @@
 // Show the description of a single poverty indicator.
 
 
-// The name of the indicator to describe.
+// CONSTANTS
 //
-var indicator_name = null;
+
+ROW_KEY_COLUMN_NAME = 'varname';
+
+SECTION_ROW_KEY = 'Position in the list of indicators';
+
+//
+////////////
+
+
+// Not all platforms implement a javascript console.
+if ( ! console ) {
+    console = {
+        debug:function(){},
+        warn:function(){},
+        error:function(){}
+    };
+}
+
 
 
 // Convert plain text to html including paragraph structure.
@@ -32,68 +49,6 @@ function paragraphise(s) {
 }
 
 
-// Inject the text of each field of the indicator description in to the page.
-//
-function setIndicatorDescriptionText( description_fields )
-{
-  console.debug( description_fields );
-
-  for ( var key in description_fields ) {
-    if( description_fields.hasOwnProperty( key ) ) {
-
-      if ( key == "indicator-name" ) {
-        jQuery("#indicator-name").text(description_fields["indicator-name"]);
-      }
-      else if ( typeof key == 'string'  &&  key.length > 0 ) {
-        console.debug( key );
-        jQuery("#indicator-description ." + key).replaceWith(paragraphise(description_fields[key]));
-      }
-    }
-  }
-}
-
-
-// Build the web page from the appropriate indicator description.
-//
-function inflatePage( indicator_descriptions )
-{
-  indicator_descriptions.getRow = function ( page_title ) {
-
-    // Find the index of the requested indicator description.
-    var rx = this[0].data.reduce( function ( found_index, row_title, current_index ) {
-
-      if ( found_index !== null ) {
-        return found_index;
-      }
-      else if ( row_title == page_title ) {
-        return current_index;
-      }
-      else {
-        return null;
-      }
-    }, null );
-
-    // Did we fail to find the requested description?
-    if ( rx == -1 ) {
-      return null;
-    }
-    else
-    {
-      // Extract the fields for the appropriate indicator description from the
-      // indicator_descriptions object.
-      // We need to extract a row from a column-oriented data structure.
-      return this.reduce( function( row, col ) {
-        row[col.label] = col.data[rx];
-        return row;
-      }, {} );
-    }
-  }
-
-  // Use the extracted data to build the web page.
-  setIndicatorDescriptionText( indicator_descriptions.getRow( indicator_name ) );
-}
-
-
 function getParameterFromQueryString(name) {
   name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
   var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
@@ -105,7 +60,46 @@ function getParameterFromQueryString(name) {
 }
 
 
-// And go...
 
-indicator_name = getParameterFromQueryString( 'name' );
-GoogleDataLoader.gimme( "https://docs.google.com/spreadsheets/d/1_3gRhw7tOwXxYvAjYtqZATL6xfaET9mAFUQpNt_OegQ/gviz/tq", inflatePage );
+
+var indicator_name = getParameterFromQueryString( 'name' );
+
+function inflatePage( indicator_metadata ) {
+    var headings = indicator_metadata.column( ROW_KEY_COLUMN_NAME );
+    var column_names = indicator_metadata.userDefinedColumnNames();
+
+    var descriptions = column_names.reduce( function(result, name) {
+        if ( result ) {
+            return result;
+        }
+        else if ( indicator_metadata.value( 0, name ) == indicator_name ) {
+            console.debug("Win!");
+            return indicator_metadata.column(name);
+        }
+        else {
+            return null;
+        }
+    }, null );
+
+    if ( ! descriptions ) {
+        jQuery('#indicator-name').text( "Failed to find requested indicator" );
+        return;
+    }
+
+    jQuery('#indicator-name').text( descriptions[0] );
+
+    for ( var i = 1; i < descriptions.length; i++ ) {
+
+        if ( headings[i] == '' || headings[i] == SECTION_ROW_KEY ) {
+            continue;
+        }
+
+        jQuery('#indicator-description').append(
+            jQuery('<h2>').text(headings[i]),
+            jQuery('<div>').append(paragraphise(descriptions[i]))
+        );
+    }
+}
+
+// ...and go:
+loadCartoDbDataset( 'indicator_metadata_2016_04_05', inflatePage );
