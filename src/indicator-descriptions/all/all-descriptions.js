@@ -1,71 +1,94 @@
 // all-descriptions.js
 // Show a summary of all indicators on a single page.
 
-function inflatePage( all_data ) {
-    console.debug( all_data );
-    var descriptions = all_data['descriptions'];
-    var la_data = all_data['local_authority_data'];
+// CONSTANTS
+//
+ROW_KEY_COLUMN_NAME = 'varname';
 
-    if ( descriptions ) {
+NAME_ROW_KEY = 'Indicator';
+SECTION_ROW_KEY = 'Position in the list of indicators';
 
-        console.debug( descriptions );
+//
+////////////
 
-        jQuery( '#all-descriptions' ).append( jQuery( '<ul>' ) );
 
-        descriptions[0].data.forEach( function ( name, index ) {
-            var summary = descriptions[1].data[index];
-            var short_label =
-                la_data.getColumnByProperty( 'descriptionPageTitle', name ).shortLabel;
+function inflatePage( indicator_metadata ) {
+    console.debug( indicator_metadata );
 
-            jQuery( '#all-descriptions  > ul' ).append(
-                jQuery( '<li>' ).append(
-                    jQuery( '<h3>' ).text( name ),
-                    jQuery( '<p>' ).text( summary ),
-                    jQuery( '<div>' ).append(
-                        jQuery( '<span>' ).text( 'See: ' ),
-                        jQuery( '<ul>' ).append(
-                            jQuery( '<li>' ).append(
-                                jQuery( '<a href="/poverty-monitor/indicator-descriptions/?name=' + encodeURIComponent(name) + '">' ).text( 'Full description' )
-                            ),
-                            jQuery( '<li>' ).append(
-                                jQuery( '<a href="/poverty-monitor/indicator-visualisations/?level=local-authority-and-region&measure=' + encodeURIComponent(short_label) + '">' ).text( 'Local authority level information' )
-                            )
+    var row_keys = indicator_metadata.column( ROW_KEY_COLUMN_NAME );
+    var value = function(column, row_key) {
+        return column[row_keys.IndexOf(row_key)];
+    }
+
+    // Build the shallow tree of sections and summary data.
+    var summaries = {}
+    for ( key in indicator_metadata.userDefinedColumnNames() ) {
+        if ( key == ROW_KEY_COLUMN_NAME ) {
+            continue;
+        }
+
+        var col = indicator_metadata.column(key);
+        var section = value(col,SECTION_ROW_KEY);
+
+        if ( section == '' ) {
+            var name = value(col,NAME_ROW_KEY);
+            summaries[name] = summary(key,col);
+        } else {
+            if ( ! summaries.hasOwnProperty(section) ) {
+                summaries[section] = [];
+            }
+            summaries[section].push( summary(key, col) );
+        }
+    }
+
+    var addSummary = function(summary) {
+        jQuery( '#all-descriptions  > ul' ).append(
+            jQuery( '<li>' ).append(
+                jQuery( '<h3>' ).text( name ),
+                jQuery( '<p>' ).text( summary ),
+                jQuery( '<div>' ).append(
+                    jQuery( '<span>' ).text( 'See: ' ),
+                    jQuery( '<ul>' ).append(
+                        jQuery( '<li>' ).append(
+                            jQuery( '<a href="/poverty-monitor/indicator-descriptions/?name=' + encodeURIComponent(name) + '">' ).text( 'Full description' )
+                        ),
+                        jQuery( '<li>' ).append(
+                            jQuery( '<a href="/poverty-monitor/indicator-visualisations/?level=local-authority-and-region&measure=' + encodeURIComponent(short_label) + '">' ).text( 'Local authority level information' )
                         )
                     )
                 )
-            );
-        } );
-    }
-    else {
-        jQuery( '#all-descriptions' ).append(
-            jQuery( '<p>' ).text(
-                'We are sorry. Something went wrong. We were unable to load the descriptions of the poverty index indicators.'
             )
         );
     }
-}
 
-function getCallbackCreator( number_of_data_callbacks, final_callback ) {
+    // Build the markup for the summary list.
+    jQuery( '#all-descriptions' ).append( jQuery( '<ul>' ) );
 
-    var all_data = {}
+    for ( section_name in summaries ) {
+        var section = summaries[section_name];
 
-    return function ( data_key ) {
+        if ( Array.isArray( section ) ){
+            addSection( section_name )
 
-        return function( data_value ) {
-            all_data[data_key] = data_value;
-
-            if ( Object.keys(all_data).length == number_of_data_callbacks ) {
-                final_callback( all_data );
-            }
+        } else {
+            addSummary( section )
         }
-    }
+
+    indicator_metadata.forEach( function ( name, index ) {
+        var summary = descriptions[1].data[index];
+        var short_label =
+            la_data.getColumnByProperty( 'descriptionPageTitle', name ).shortLabel;
+
+    } );
+//     }
+//     else {
+//         jQuery( '#all-descriptions' ).append(
+//             jQuery( '<p>' ).text(
+//                 'We are sorry. Something went wrong. We were unable to load the descriptions of the poverty index indicators.'
+//             )
+//         );
+//     }
 }
 
-
-var getCallback = getCallbackCreator( 2, inflatePage );
-
-GoogleDataLoader.gimme(
-    "https://docs.google.com/spreadsheets/d/1_3gRhw7tOwXxYvAjYtqZATL6xfaET9mAFUQpNt_OegQ/gviz/tq",
-    getCallback( 'descriptions' )
-);
-CartoDbDataLoader.gimme( 'localauthoritymultiindicator_rg', 'areaname', getCallback( 'local_authority_data' ) );
+// ...and go!
+loadCartoDbDataset( 'indicator_metadata_2016_04_05', inflatePage );
