@@ -314,8 +314,8 @@ function drawTable ( indicator )
 function setInitialIndicator() {
 
     // Does the URL indicate a measure to be shown?
-    var iteration_key = getParameterFromQueryString( 'measure' );
-    if ( iteration_key ) {
+    var indicator_name = getParameterFromQueryString( 'measure' );
+    if ( indicator_name ) {
 
         // TO DO:
         // Currently we are expecting an iteration key in the query string,
@@ -323,11 +323,14 @@ function setInitialIndicator() {
         // name. We need to add a fn to the PovmonDataset to obtain the
         // latest iteration of a given indicator.
 
-        var indicator = povmon_dataset.indicator( iteration_key, detail_level );
-        if ( indicator ) {
-            console.debug( ["Initialising with indicator found from query string", iteration_key, indicator] );
-            selectIndicator( indicator );
-            return;
+        var iteration_key = povmon_dataset.getLatestIndicatorKeyFromName( indicator_name );
+        if ( iteration_key ) {
+            var indicator = povmon_dataset.indicator( iteration_key, detail_level );
+            if ( indicator ) {
+                console.debug( ["Initialising with indicator found from query string", iteration_key, indicator] );
+                selectIndicator( indicator );
+                return;
+            }
         }
     }
 

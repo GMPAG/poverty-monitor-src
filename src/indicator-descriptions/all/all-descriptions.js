@@ -111,10 +111,10 @@ function inflatePage( indicator_metadata ) {
                 jQuery( '<ul>' ).append(
                     jQuery( '<li>' ).append(
                         jQuery( '<a href="/poverty-monitor/indicator-descriptions/?name=' + encodeURIComponent(summary.name) + '">' ).text( 'About this indicator' )
-                    )//,
-//                     jQuery( '<li>' ).append(
-//                         jQuery( '<a href="/poverty-monitor/indicator-visualisations/?level=local-authority-and-region&measure=' + summary.key + '">' ).text( 'What the data shows' )
-//                     )
+                    ),
+                    jQuery( '<li>' ).append(
+                        jQuery( '<a href="/poverty-monitor/indicator-visualisations/?level=local-authority-and-region&measure=' + encodeURIComponent(summary.name) + '">' ).text( 'What the data shows' )
+                    )
                 )
             )
         );

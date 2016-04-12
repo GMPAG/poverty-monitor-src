@@ -188,23 +188,28 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
     this.getMenuItemLabel = function(iteration_key) {
         return indicatorProperty( iteration_key, "Indicator" );
     }
-    /*
+
     this.getLatestIndicatorKeyFromName = function( indicator_name ) {
+        var root = this.getIndicatorRootKeyFromName( indicator_name );
+        this.latestIndicatorKeys().forEach( function ( key ) {
+            if ( key.indexOf(root) == 0 ) {
+                return key;
+            }
+        });
+        return null;
     }
 
     this.getIndicatorRootKeyFromName = function( indicator_name ) {
-    var  = indicator_metadata.userDefinedColumnNames();
+        var indicator_keys = indicator_metadata.userDefinedColumnNames();
 
-    indicator_keys.forEach( function(key) {
-        if ( indicator_metadata.value( INDICATOR_NAME_ROW_KEY, name ) == indicator_name ) {
-            return indicator_metadata.column(name);
-        }
-        else {
-            return null;
-        }
-    }, null );
+        indicator_keys.forEach( function(key) {
+            if ( indicator_metadata.value( 0, key ) == indicator_name ) {
+                return key;
+            }
+        });
+        return null;
     }
-*/
+
     // Get the data for a given indicator.
     // The returned object includes the relevant geographical IDs as well as
     // some utility functions.
