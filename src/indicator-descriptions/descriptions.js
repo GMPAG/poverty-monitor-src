@@ -8,6 +8,7 @@
 ROW_KEY_COLUMN_NAME = 'varname';
 
 SECTION_ROW_KEY = 'Position in the list of indicators';
+INDICATOR_NAME_ROW_KEY = 'Indicator'
 
 //
 ////////////
@@ -65,15 +66,15 @@ function getParameterFromQueryString(name) {
 var indicator_name = getParameterFromQueryString( 'name' );
 
 function inflatePage( indicator_metadata ) {
-    var headings = indicator_metadata.column( ROW_KEY_COLUMN_NAME );
     var column_names = indicator_metadata.userDefinedColumnNames();
 
+    // Get the descriptions text for the current indicator from the appropriate
+    // column of the metadata.
     var descriptions = column_names.reduce( function(result, name) {
         if ( result ) {
             return result;
         }
         else if ( indicator_metadata.value( 0, name ) == indicator_name ) {
-            console.debug("Win!");
             return indicator_metadata.column(name);
         }
         else {
@@ -81,24 +82,30 @@ function inflatePage( indicator_metadata ) {
         }
     }, null );
 
+
     if ( ! descriptions ) {
         jQuery('#indicator-name').text( "Failed to find requested indicator" );
         return;
     }
 
-    jQuery('#indicator-name').text( descriptions[0] );
 
-    for ( var i = 1; i < descriptions.length; i++ ) {
+    // Add the various description elements to the web page.
+    var headings = indicator_metadata.column( ROW_KEY_COLUMN_NAME );
+    headings.forEach( function ( heading, i ) {
 
-        if ( headings[i] == '' || headings[i] == SECTION_ROW_KEY ) {
-            continue;
+        if ( heading == '' || heading == SECTION_ROW_KEY ) {
+            // Do nothing. Not a displayable row.
         }
-
-        jQuery('#indicator-description').append(
-            jQuery('<h2>').text(headings[i]),
-            jQuery('<div>').append(paragraphise(descriptions[i]))
-        );
-    }
+        else if ( heading == INDICATOR_NAME_ROW_KEY ) {
+            jQuery('#indicator-name').text( descriptions[i] );
+        }
+        else {
+            jQuery('#indicator-description').append(
+                jQuery('<h2>').text(heading),
+                jQuery('<div>').append(paragraphise(descriptions[i]))
+            );
+        }
+    });
 }
 
 // ...and go:

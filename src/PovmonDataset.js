@@ -16,6 +16,8 @@ var INDICATOR_PROPERTY_NAMES_COLUMN_NAME = 'varname';
 var GEO_CODE_COLUMN_NAME = 'geo_code';
 var GEO_NAME_COLUMN_NAME = 'geo_name';
 
+var INDICATOR_NAME_ROW_KEY = 'Indicator';
+
 //
 ////////////
 
@@ -186,7 +188,23 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
     this.getMenuItemLabel = function(iteration_key) {
         return indicatorProperty( iteration_key, "Indicator" );
     }
+    /*
+    this.getLatestIndicatorKeyFromName = function( indicator_name ) {
+    }
 
+    this.getIndicatorRootKeyFromName = function( indicator_name ) {
+    var  = indicator_metadata.userDefinedColumnNames();
+
+    indicator_keys.forEach( function(key) {
+        if ( indicator_metadata.value( INDICATOR_NAME_ROW_KEY, name ) == indicator_name ) {
+            return indicator_metadata.column(name);
+        }
+        else {
+            return null;
+        }
+    }, null );
+    }
+*/
     // Get the data for a given indicator.
     // The returned object includes the relevant geographical IDs as well as
     // some utility functions.

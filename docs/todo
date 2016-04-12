@@ -2,8 +2,6 @@ To do:
 
 Add hovers to map
 
-Make descriptions work
-
 Add landing page and menu items
 
 Reskin for new site
@@ -28,5 +26,4 @@ Add title / label / whatever to table - DONE!!!
 
 Change basemap dynamically. labels above for lsoa, labels below for LA - DONE!!! by using two different static maps.
 
-
-
+Make descriptions work

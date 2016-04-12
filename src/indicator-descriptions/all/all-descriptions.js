@@ -110,10 +110,10 @@ function inflatePage( indicator_metadata ) {
                 jQuery( '<span>' ).text( 'See: ' ),
                 jQuery( '<ul>' ).append(
                     jQuery( '<li>' ).append(
-                        jQuery( '<a href="/poverty-monitor/indicator-descriptions/?name=' + encodeURIComponent(summary.name) + '">' ).text( 'Full description' )
+                        jQuery( '<a href="/poverty-monitor/indicator-descriptions/?name=' + encodeURIComponent(summary.name) + '">' ).text( 'About this indicator' )
                     )//,
 //                     jQuery( '<li>' ).append(
-//                         jQuery( '<a href="/poverty-monitor/indicator-visualisations/?level=local-authority-and-region&measure=' + summary.key + '">' ).text( 'Local authority level information' )
+//                         jQuery( '<a href="/poverty-monitor/indicator-visualisations/?level=local-authority-and-region&measure=' + summary.key + '">' ).text( 'What the data shows' )
 //                     )
                 )
             )
@@ -146,12 +146,11 @@ function inflatePage( indicator_metadata ) {
         // our HACKED in order for sections.
         section_names = HACK_SECTION_ORDER;
     } else {
-        console.warn( [
+        console.warn(
             'The section names as defined by row key "' + SECTION_ROW_KEY +
             '" have changed, so we are not imposing any kind of order on the sections.'
-            + 'This is probably not what you want.',
-            section_names,
-            HACK_SECTION_ORDER ] );
+            + 'This is probably not what you want.' );
+        console.warn( [section_names, HACK_SECTION_ORDER ] );
     }
 
     // Start the markup for the summary list.
