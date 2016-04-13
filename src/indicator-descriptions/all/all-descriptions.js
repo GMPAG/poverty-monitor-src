@@ -22,6 +22,11 @@ HACK_SECTION_ORDER = [
     'Housing Unaffordability',
     'Other Indicators'
 ];
+
+// HACK: The IMD is a special case because severity / numerical value are
+// inversely related and it is not available at a local authority level.
+HACK_IMD_NAME = 'Indices of Multiple Deprivation (IMD)';
+
 //
 ////////////
 
@@ -104,16 +109,25 @@ function inflatePage( indicator_metadata ) {
             );
         }
 
+        var detail_level =
+            summary.name == HACK_IMD_NAME ? 'lsoa' : 'local-authority';
+
         jQuery( '#all-descriptions > ul > li > ul > li' ).last().append(
             jQuery( '<p>' ).text( summary.description ),
             jQuery( '<div>' ).append(
                 jQuery( '<span>' ).text( 'See: ' ),
                 jQuery( '<ul>' ).append(
                     jQuery( '<li>' ).append(
-                        jQuery( '<a href="/poverty-monitor/indicator-descriptions/?name=' + encodeURIComponent(summary.name) + '">' ).text( 'About this indicator' )
+                        jQuery(
+                            '<a href="/poverty-monitor/indicator-descriptions/?name='
+                            + encodeURIComponent(summary.name) + '">'
+                        ).text( 'About this indicator' )
                     ),
                     jQuery( '<li>' ).append(
-                        jQuery( '<a href="/poverty-monitor/indicator-visualisations/?level=local-authority-and-region&measure=' + encodeURIComponent(summary.name) + '">' ).text( 'What the data shows' )
+                        jQuery(
+                            '<a href="/poverty-monitor/indicator-visualisations/?level='
+                            + detail_level + '&measure=' + encodeURIComponent(summary.name) + '">'
+                        ).text( 'What the data shows' )
                     )
                 )
             )

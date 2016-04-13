@@ -1,3 +1,7 @@
+// HACK: The IMD is a special case because severity / numerical value are
+// inversely related and it is not available at a local authority level.
+HACK_IMD_TITLE = 'Indices of Multiple Deprivation (IMD)';
+
 var povmon_dataset = null;
 
 var chart = null;
@@ -103,15 +107,22 @@ function getMapSql( indicator )
     return sql;
 }
 
-function getColourRampCss( colour, value )
+function getColourRampCss( colour, value, inverse )
 {
+    var comparator;
+    if ( inverse ) {
+        comparator = '>=';
+    } else {
+        comparator = '<=';
+    }
+
     return '\n\
-#localauthoritymultiindicator_withboundaries [ indicator <= ' + value + '] {  \n\
+#localauthoritymultiindicator_withboundaries [ indicator ' + comparator + value + '] {  \n\
 polygon-fill: ' + colour + ';  \n\
 }';
 }
 
-function getMapCss( min, max, show_labels )
+function getMapCss( min, max, show_labels, inverse_ramp )
 {
     var result = "\n\
 /** choropleth visualization */   \n\
@@ -146,19 +157,28 @@ text-placement-type: simple;   \n\
     var colours =
         [ '#B10026', '#E31A1C', '#FC4E2A', '#FD8D3C', '#FEB24C', '#FED976', '#FFFFB2' ];
 
-    var getSteps = function( min, max, num_steps ) {
-        var result = []
-        for ( var v = max, i = 0; i < num_steps; i++, v -= (max-min)/num_steps ) {
+    var getSteps = function( min, max, num_steps, inverse ) {
+        var result = [];
+        var inc = (max-min)/num_steps;
+
+        var start;
+        if ( inverse ) {
+            start = min;
+        } else {
+            start = max; inc = -inc;
+        }
+
+        for ( var v = start, i = 0; i < num_steps; i++, v += inc ) {
             result.push(v);
         }
         return result;
     }
 
-    var vals = getSteps( min, max, colours.length )
+    var vals = getSteps( min, max, colours.length, inverse_ramp );
 
     colours.forEach( function ( colour, index ) {
         var val = vals[index];
-        var colourCSS = getColourRampCss( colour, val );
+        var colourCSS = getColourRampCss( colour, val, inverse_ramp );
         result += colourCSS;
     } );
 
@@ -167,8 +187,6 @@ text-placement-type: simple;   \n\
 
 function updateMapForMeasure( indicator )
 {
-    var show_labels = indicator.detailLevel == DetailLevel.LA;
-
     map.getLayers()[1].getSubLayers()[0].setSQL( getMapSql(indicator) );
 
     // Remove big things from the data. They will not be shown on the map and
@@ -179,10 +197,20 @@ function updateMapForMeasure( indicator )
     var min = Math.min.apply(null, data);
     var max = Math.max.apply(null, data);
 
-    map.getLayers()[1].getSubLayers()[0].setCartoCSS( getMapCss(min, max, show_labels) );
+    var show_labels = indicator.detailLevel == DetailLevel.LA;
+    var inverse_measure = indicator.title == HACK_IMD_TITLE;
+//     console.debug( inverse_chloropleth );
 
-    jQuery( '.cartodb-legend-stack .min' ).text( min + indicator.unitsLabel );
-    jQuery( '.cartodb-legend-stack .max' ).text( max + indicator.unitsLabel );
+    map.getLayers()[1].getSubLayers()[0].setCartoCSS(
+        getMapCss(min, max, show_labels, inverse_measure) );
+
+    if ( inverse_measure ) {
+        jQuery( '.cartodb-legend-stack .min' ).text( '' );
+        jQuery( '.cartodb-legend-stack .max' ).text( '' );
+    } else {
+        jQuery( '.cartodb-legend-stack .min' ).text( min + indicator.unitsLabel );
+        jQuery( '.cartodb-legend-stack .max' ).text( max + indicator.unitsLabel );
+    }
 }
 
 function updateChartForMeasure( indicator )
