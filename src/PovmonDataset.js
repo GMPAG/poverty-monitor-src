@@ -16,7 +16,9 @@ var INDICATOR_PROPERTY_NAMES_COLUMN_NAME = 'varname';
 var GEO_CODE_COLUMN_NAME = 'geo_code';
 var GEO_NAME_COLUMN_NAME = 'geo_name';
 
-var INDICATOR_NAME_ROW_KEY = 'Indicator';
+// ASSUMPTION: Indicator names are in the first row of the indicator metadata.
+// TO DO: ??? Calculate from INDICATOR_NAME_ROW_KEY ???
+var INDICATOR_NAME_ROW_INDEX = 0;
 
 //
 ////////////
@@ -206,7 +208,7 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
     this.getIndicatorRootKeyFromName = function( indicator_name ) {
         var root_keys = indicator_metadata.userDefinedColumnNames();
         for ( var i = 0; i < root_keys.length; i++ ) {
-            if ( indicator_metadata.value( 0, root_keys[i] ) == indicator_name ) {
+            if ( indicator_metadata.value( INDICATOR_NAME_ROW_INDEX, root_keys[i] ) == indicator_name ) {
                 return root_keys[i];
             };
         }
@@ -276,7 +278,7 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
 
         // NOTE: Not a function. We immediately call the anon fn to get a value
         result.unitsLabel = function() {
-            var label = iterationProperty(key, "MEASUREUNIT_SYMBOL");
+            var label = iterationProperty(key, "MEASUREUNIT_SYMBOL_"+detail_level.toUpperCase());
             if ( label ) {
                 if ( label.match( /^\w/ ) ) {
                     // label starts with a word character, so put a space

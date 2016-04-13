@@ -32,7 +32,8 @@ function createChart( dataset )
         var columns = indicators.map( function(indicator) {
             return [ indicator.title ].concat(
                 indicator.data.filter(function (value, index) {
-                    return ! geoCodeInRange( DetailLevel.BIG, indicator.geoCodes[index] );
+//                     return ! geoCodeInRange( DetailLevel.BIG, indicator.geoCodes[index] );
+                    return true; // Including all areas. Not refactoring yet.
                 })
             );
         });
@@ -40,7 +41,8 @@ function createChart( dataset )
         // Add the geographical names as the first column.
         columns.unshift( [ x_axis_id ].concat(
             indicators[0].geoNames.filter(function (name, index) {
-                    return ! geoCodeInRange( DetailLevel.BIG, indicators[0].geoCodes[index] );
+//                     return ! geoCodeInRange( DetailLevel.BIG, indicators[0].geoCodes[index] );
+                return true; // Including all areas. Not refactoring yet.
             })
         ));
 
@@ -169,7 +171,8 @@ function updateMapForMeasure( indicator )
 
     map.getLayers()[1].getSubLayers()[0].setSQL( getMapSql(indicator) );
 
-    // Remove big things from the data. They will not be shown on the map.
+    // Remove big things from the data. They will not be shown on the map and
+    // should not affect the chloropleth.
     var data = indicator.data.filter( function(val, index) {
         return ! geoCodeInRange( DetailLevel.BIG, indicator.geoCodes[index] );
     });
@@ -430,7 +433,7 @@ switch ( getParameterFromQueryString( 'level' ) )
     case 'lsoa':
         detail_level = DetailLevel.LSOA;
         jQuery( '#page-title' ).text( 'Lower layer super output areas' );
-        jQuery('#list-of-links').append('<li>You can see visualisations of all indicators at the <a href="/poverty-monitor/indicator-visualisations?level=local-authority-and-region">local authority level</a>.</li>');
+        jQuery('#list-of-links').append('<li>You can see visualisations of most indicators at the <a href="/poverty-monitor/indicator-visualisations?level=local-authority-and-region">local authority level</a>.</li>');
         createMap( 'b7ee5b22-fff9-11e5-b060-0e3ff518bd15' );
         loadData();
         break;
