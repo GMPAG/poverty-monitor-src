@@ -210,9 +210,9 @@ function selectIndicator( indicator )
 
     jQuery( '#description-link p' ).remove();
     jQuery( '#description-link' ).append(
-        '<p>Read an <a href="/poverty-monitor/indicator-descriptions/?name='
-        + encodeURIComponent(indicator.indicatorSlug)
-        + '">explanation of this indicator</a>.</p>'  );
+        '<p><a href="/poverty-monitor/indicator-descriptions/?name='
+        + encodeURIComponent(indicator.title)
+        + '">About this indicator</a>.</p>'  );
 
     updateSelectorForMeasure( indicator );
     if ( chart ) {
@@ -323,7 +323,7 @@ function setInitialIndicator() {
         // name. We need to add a fn to the PovmonDataset to obtain the
         // latest iteration of a given indicator.
 
-        var iteration_key = povmon_dataset.getLatestIndicatorKeyFromName( indicator_name );
+        var iteration_key = povmon_dataset.getLatestIndicatorKeyFromName( indicator_name, detail_level );
         if ( iteration_key ) {
             var indicator = povmon_dataset.indicator( iteration_key, detail_level );
             if ( indicator ) {

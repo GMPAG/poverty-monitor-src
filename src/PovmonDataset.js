@@ -24,6 +24,9 @@ var INDICATOR_NAME_ROW_KEY = 'Indicator';
 
 
 var geoCodeInRange = function(detailLevel, code) {
+    if ( ! detailLevel ) {
+        debugger;
+    }
     return GeoCodeRanges[detailLevel].MIN <= code &&
         code <= GeoCodeRanges[detailLevel].MAX;
 }
@@ -189,24 +192,24 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
         return indicatorProperty( iteration_key, "Indicator" );
     }
 
-    this.getLatestIndicatorKeyFromName = function( indicator_name ) {
+    this.getLatestIndicatorKeyFromName = function( indicator_name, detail_level ) {
         var root = this.getIndicatorRootKeyFromName( indicator_name );
-        this.latestIndicatorKeys().forEach( function ( key ) {
-            if ( key.indexOf(root) == 0 ) {
-                return key;
+        var keys = this.latestIndicatorKeys(detail_level);
+        for ( var i = 0; i < keys.length; i++ ) {
+            if ( keys[i].indexOf(root) == 0 ) {
+                return keys[i];
             }
-        });
+        }
         return null;
     }
 
     this.getIndicatorRootKeyFromName = function( indicator_name ) {
-        var indicator_keys = indicator_metadata.userDefinedColumnNames();
-
-        indicator_keys.forEach( function(key) {
-            if ( indicator_metadata.value( 0, key ) == indicator_name ) {
-                return key;
-            }
-        });
+        var root_keys = indicator_metadata.userDefinedColumnNames();
+        for ( var i = 0; i < root_keys.length; i++ ) {
+            if ( indicator_metadata.value( 0, root_keys[i] ) == indicator_name ) {
+                return root_keys[i];
+            };
+        }
         return null;
     }
 
