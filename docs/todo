@@ -1,10 +1,10 @@
 To do:
 
+Find out why indicator 'undefined' being reported on vis load
+
+Use new data with neg codes - make code edits to detect "< 0" where we currently detect "= 0"
+
 Add hovers to map
-
-Add landing page and menu items
-
-Reskin for new site
 
 
 Ideas:
@@ -27,3 +27,7 @@ Add title / label / whatever to table - DONE!!!
 Change basemap dynamically. labels above for lsoa, labels below for LA - DONE!!! by using two different static maps.
 
 Make descriptions work
+
+Add landing page and menu items
+
+Reskin for new site

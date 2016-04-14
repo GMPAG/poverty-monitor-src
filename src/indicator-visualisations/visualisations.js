@@ -102,7 +102,8 @@ function getMapSql( indicator )
 {
     var sql = 'SELECT cartodb_id, geo_name, the_geom, the_geom_webmercator, '
     + indicator.key + " as indicator, '" + indicator.unitsLabel + "' as units FROM "
-    + indicator.datasetName + '_with_' + indicator.detailLevel + '_boundaries WHERE the_geom IS NOT NULL';
+    + indicator.datasetName + '_with_' + indicator.detailLevel
+    + '_boundaries WHERE the_geom IS NOT NULL AND 0.0 <= ' + indicator.key;
     console.debug(sql);
     return sql;
 }
@@ -239,7 +240,6 @@ function updateLinksForMeasure( indicator )
 {
     jQuery( '#list-of-links > li > a' ).each( function () {
         var href = jQuery(this).attr('href');
-        console.debug( 'href' );
 
         var indicator_index = href.indexOf( '&measure=' );
         if ( -1 != indicator_index ) {
@@ -248,7 +248,6 @@ function updateLinksForMeasure( indicator )
             //        dynamically alter these links in other ways later.
             href = href.slice( 0, indicator_index+1 );
         }
-        console.debug( 'href' );
 
         jQuery(this).attr('href', href + '&measure=' + indicator.title);
     });
@@ -465,6 +464,7 @@ function getParameterFromQueryString(name) {
 function loadData() {
     loadPovmonDataset(
         ['indicators_geo2001_2016_04_05','indicators_geo2011_2016_04_05'],
+//         ['table_2001','table_2011'],
         'indicator_metadata_2016_04_05',
         'iteration_metadata_2016_04_05',
         makePageElements
