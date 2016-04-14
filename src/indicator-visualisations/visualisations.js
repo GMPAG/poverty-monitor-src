@@ -235,6 +235,25 @@ function updateSelectorForMeasure( indicator )
     jQuery( '#measure-selector li[measure="' + indicator.name + '"]' ).addClass( 'active' );
 }
 
+function updateLinksForMeasure( indicator )
+{
+    jQuery( '#list-of-links > li > a' ).each( function () {
+        var href = jQuery(this).attr('href');
+        console.debug( 'href' );
+
+        var indicator_index = href.indexOf( '&measure=' );
+        if ( -1 != indicator_index ) {
+            // ASSUMPTION: 'measure' is always the final param in the query string.
+            // TO DO: Implement this in a more robust way in case we
+            //        dynamically alter these links in other ways later.
+            href = href.slice( 0, indicator_index+1 );
+        }
+        console.debug( 'href' );
+
+        jQuery(this).attr('href', href + '&measure=' + indicator.title);
+    });
+}
+
 function selectIndicator( indicator )
 {
     jQuery( '#measure-name' ).text( indicator.title );
@@ -251,6 +270,8 @@ function selectIndicator( indicator )
     }
     updateMapForMeasure( indicator );
     drawTable( indicator );
+
+    updateLinksForMeasure( indicator );
 }
 
 //     function onCategoryClicked(e)
@@ -363,6 +384,11 @@ function setInitialIndicator() {
                 return;
             }
         }
+
+        jQuery('#user-messages').css("display", "");
+        jQuery('#user-messages li').text(
+            'Information for '+indicator_name+' is not available at this detail level.'
+        );
     }
 
     // No measure indicated by URL. Use default.
@@ -454,14 +480,14 @@ switch ( getParameterFromQueryString( 'level' ) )
     case 'region':
         detail_level = DetailLevel.LA;
         jQuery( '#page-title' ).text( 'Local authorities' );
-        jQuery('#list-of-links').append('<li>You can see visualisations of some of these indicators on a <a href="/poverty-monitor/indicator-visualisations?level=lsoa">much smaller scale</a>. (The smaller areas are called "Lower Super Output Areas".)</li>');
+        jQuery('#list-of-links .la').css("display","");
         createMap( '60a322fc-fcad-11e5-8cd2-0e5db1731f59' );
         loadData();
         break;
     case 'lsoa':
         detail_level = DetailLevel.LSOA;
         jQuery( '#page-title' ).text( 'Lower layer super output areas' );
-        jQuery('#list-of-links').append('<li>You can see visualisations of most indicators at the <a href="/poverty-monitor/indicator-visualisations?level=local-authority-and-region">local authority level</a>.</li>');
+        jQuery('#list-of-links .lsoa').css("display","");
         createMap( 'b7ee5b22-fff9-11e5-b060-0e3ff518bd15' );
         loadData();
         break;
