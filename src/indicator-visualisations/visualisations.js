@@ -204,9 +204,9 @@ function updateMapForMeasure( indicator )
     map.getLayers()[1].getSubLayers()[0].setCartoCSS(
         getMapCss(min, max, show_labels, inverse_measure) );
 
-    if ( inverse_measure ) {
-        jQuery( '.cartodb-legend-stack .min' ).text( '' );
-        jQuery( '.cartodb-legend-stack .max' ).text( '' );
+    if ( indicator.title == HACK_IMD_TITLE ) {
+        jQuery( '.cartodb-legend-stack .min' ).text( "Least deprived" );
+        jQuery( '.cartodb-legend-stack .max' ).text( "Most deprived" );
     } else {
         jQuery( '.cartodb-legend-stack .min' ).text( min + indicator.unitsLabel );
         jQuery( '.cartodb-legend-stack .max' ).text( max + indicator.unitsLabel );
