@@ -132,10 +132,12 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
     var isEmptyIteration = function( key, detail_level ) {
         var dataset = datasetContainingColumn(key);
         var geo_codes = dataset.column('geo_code');
-        var hasNonZeroValues = dataset.column(key).some(function(value, index){
-            return value !=0  &&  geoCodeInRange(detail_level, geo_codes[index]);
+        var hasNonEmptyValues = dataset.column(key).some(function(value, index){
+            // ASSUMPTION: Negative data is invalid. Our current data source
+            // cannot contain nulls, hence the use of negative numbers.
+            return value >= 0  &&  geoCodeInRange(detail_level, geo_codes[index]);
         });
-        return ! hasNonZeroValues;
+        return ! hasNonEmptyValues;
     }
 
     // Split key into { keyRoot, iterationID } where keyRoot is the key for an

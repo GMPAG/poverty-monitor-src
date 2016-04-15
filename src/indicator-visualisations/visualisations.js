@@ -193,7 +193,7 @@ function updateMapForMeasure( indicator )
     // Remove big things from the data. They will not be shown on the map and
     // should not affect the chloropleth.
     var data = indicator.data.filter( function(val, index) {
-        return ! geoCodeInRange( DetailLevel.BIG, indicator.geoCodes[index] );
+        return val >= 0  &&  ! geoCodeInRange( DetailLevel.BIG, indicator.geoCodes[index] );
     });
     var min = Math.min.apply(null, data);
     var max = Math.max.apply(null, data);
@@ -246,7 +246,7 @@ function updateLinksForMeasure( indicator )
             // ASSUMPTION: 'measure' is always the final param in the query string.
             // TO DO: Implement this in a more robust way in case we
             //        dynamically alter these links in other ways later.
-            href = href.slice( 0, indicator_index+1 );
+            href = href.slice( 0, indicator_index );
         }
 
         jQuery(this).attr('href', href + '&measure=' + indicator.title);
@@ -320,21 +320,25 @@ function drawTable ( indicator )
 
     var is_displayable = function(x) { return x!=='' && x!==null; };
 
-//     var debug_countdown = 10;
-
     var config = {
         data : indicator.geoNames.map( function ( geoname, index ) {
 
-            var result = [ geoname, indicator.data[index] ];
-//             if ( debug_countdown > 0 ) {
-//                 console.debug( result );
-//                 debug_countdown -= 1;
-//             }
+            var result = [
+                geoname,
+                // ASSUMPTION: Negative data is invalid. Our current data source
+                // cannot contain nulls, hence the use of negative numbers.
+                indicator.data[index] >= 0 ? indicator.data[index] : "No valid data"
+            ];
             return result;
         } ),
         columns : [
             { title : "Area" },
-            { title : indicator.title }
+            {
+                title : indicator.title,
+                // Data may contain strings that describe missing data points.
+                // Force sorting to work for numbers rather than words.
+                type : "num"
+            }
         ],
         order : [[ 1, "desc" ]]
     };
@@ -463,7 +467,7 @@ function getParameterFromQueryString(name) {
 
 function loadData() {
     loadPovmonDataset(
-        ['indicators_geo2001_2016_04_05','indicators_geo2011_2016_04_05'],
+        ['indicators_geo2001_2016_04_05_a','indicators_geo2011_2016_04_05_a'],
 //         ['table_2001','table_2011'],
         'indicator_metadata_2016_04_05',
         'iteration_metadata_2016_04_05',
