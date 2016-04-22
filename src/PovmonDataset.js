@@ -272,11 +272,14 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
             return Math.max.apply(null, this.data.filter(function(x){return x;}) );
         };
 
-        // NOTE: Not a function. We immediately call the anon fn to get a value
-        result.title = function() {
-            var title = indicatorProperty(key, "Indicator");
-            return title ? title : "";
-        }();
+        var title = indicatorProperty(key, "Indicator");
+        result.title = title ? title : "";
+
+        result.chartYAxisLabel =
+            indicatorProperty(key, "Y_AXIS_LABEL_"+detail_level.toUpperCase());
+
+        var label = indicatorProperty(key, "MAP_LABEL_"+detail_level.toUpperCase());
+        result.mapLabel = label ? label : "";
 
         // NOTE: Not a function. We immediately call the anon fn to get a value
         result.unitsLabel = function() {
@@ -292,12 +295,6 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
             }
             return label;
         }();
-
-        result.chartYAxisLabel =
-            indicatorProperty(key, "Y_AXIS_LABEL_"+detail_level.toUpperCase());
-
-        result.mapLabel =
-            indicatorProperty(key, "MAP_LABEL_"+detail_level.toUpperCase());
 
         return result;
     }

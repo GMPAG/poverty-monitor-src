@@ -188,6 +188,8 @@ text-placement-type: simple;   \n\
 
 function updateMapForMeasure( indicator )
 {
+    jQuery('#map-label').text(indicator.mapLabel)
+
     map.getLayers()[1].getSubLayers()[0].setSQL( getMapSql(indicator) );
 
     // Remove big things from the data. They will not be shown on the map and
