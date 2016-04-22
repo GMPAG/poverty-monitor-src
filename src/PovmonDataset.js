@@ -293,6 +293,12 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
             return label;
         }();
 
+        result.chartYAxisLabel =
+            indicatorProperty(key, "Y_AXIS_LABEL_"+detail_level.toUpperCase());
+
+        result.mapLabel =
+            indicatorProperty(key, "MAP_LABEL_"+detail_level.toUpperCase());
+
         return result;
     }
 }

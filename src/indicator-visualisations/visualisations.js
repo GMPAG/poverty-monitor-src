@@ -217,7 +217,9 @@ function updateMapForMeasure( indicator )
 function updateChartForMeasure( indicator )
 {
     chart.hide();
-    chart.axis.labels( { y: indicator.unitsLabel } );
+    chart.axis.labels( {
+        y: indicator.chartYAxisLabel ? indicator.chartYAxisLabel : indicator.unitsLabel
+    } );
     chart.show( indicator.title );
 }
 
