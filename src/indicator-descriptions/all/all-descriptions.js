@@ -139,15 +139,14 @@ function inflatePage( indicator_metadata ) {
     // (See the CONSTANTS block at the top of this file.)
     var section_names = Object.keys(summaries);
 
-    function isIdenticalArrayContents( a1, a2 ) {
+    function arrayContentsAreIdentical( a1, a2 ) {
 
         if ( a1.length != a2.length ) {
             return false;
         }
 
         // Make sure that none of the values in a1 are missing from a2.
-        // WEAKNESS: Fails if a unique value in a2 occurs multiple times in a1.
-        // ASSUMPTION: No values will occur multiple times in either array.
+        // ASSUMPTION: No value will occur multiple times in either array.
         var isMissingSection = a1.some( function( a1val ) {
             return ( -1 == a2.indexOf(a1val) );
         });
@@ -155,7 +154,7 @@ function inflatePage( indicator_metadata ) {
         return ! isMissingSection;
     }
 
-    if ( isIdenticalArrayContents( section_names, HACK_SECTION_ORDER ) ) {
+    if ( arrayContentsAreIdentical( section_names, HACK_SECTION_ORDER ) ) {
         // Only the section names we are already aware of are present, so use
         // our HACKED in order for sections.
         section_names = HACK_SECTION_ORDER;

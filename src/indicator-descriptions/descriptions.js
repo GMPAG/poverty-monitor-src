@@ -88,22 +88,28 @@ function inflatePage( indicator_metadata ) {
         return;
     }
 
+    var isForDisplay = function(row_heading) {
+        return row_heading != '' &&
+            row_heading != SECTION_ROW_KEY &&
+            // Assume an all-upper-case row heading is for use elsewhere.
+            row_heading != row_heading.toUpperCase();
+    }
 
     // Add the various description elements to the web page.
-    var headings = indicator_metadata.column( ROW_KEY_COLUMN_NAME );
-    headings.forEach( function ( heading, i ) {
+    var row_headings = indicator_metadata.column( ROW_KEY_COLUMN_NAME );
+    row_headings.forEach( function ( heading, i ) {
+        var description = descriptions[i];
 
-        if ( heading == '' || heading == SECTION_ROW_KEY ) {
-            // Do nothing. Not a displayable row.
-        }
-        else if ( heading == INDICATOR_NAME_ROW_KEY ) {
-            jQuery('#indicator-name').text( descriptions[i] );
-        }
-        else {
-            jQuery('#indicator-description').append(
-                jQuery('<h2>').text(heading),
-                jQuery('<div>').append(paragraphise(descriptions[i]))
-            );
+        if ( isForDisplay(heading) && description != "" ) {
+            if ( heading == INDICATOR_NAME_ROW_KEY ) {
+                jQuery('#indicator-name').text( description );
+            }
+            else {
+                jQuery('#indicator-description').append(
+                    jQuery('<h2>').text(heading),
+                    jQuery('<div>').append(paragraphise(description))
+                );
+            }
         }
     });
 }
