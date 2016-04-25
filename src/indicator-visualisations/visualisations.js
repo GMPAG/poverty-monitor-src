@@ -34,7 +34,84 @@ function createChart( dataset )
         });
 
         var columns = indicators.map( function(indicator) {
-            return [ indicator.title ].concat(
+            return [ indicator.iterationTitle ].concat(
+                indicator.data.filter(function (value, index) {
+//                     return ! geoCodeInRange( DetailLevel.BIG, indicator.geoCodes[index] );
+                    return true; // Including all areas. Not refactoring yet.
+                })
+            );
+        });
+
+        // Add the geographical names as the first column.
+        columns.unshift( [ x_axis_id ].concat(
+            indicators[0].geoNames.filter(function (name, index) {
+//                     return ! geoCodeInRange( DetailLevel.BIG, indicators[0].geoCodes[index] );
+                return true; // Including all areas. Not refactoring yet.
+            })
+        ));
+
+        return columns;
+    }
+    var columns = getChartColumns();
+
+    chart = c3.generate( {
+        bindto: '#chart',
+        size: {
+            height: 400
+        },
+        data: {
+            x: x_axis_id,
+            columns: columns,
+            type: 'bar',
+            // Hide all columns except x and first data column.
+            hide: columns.slice(2).map( function(col) {return col[0];} )
+        },
+        axis: {
+            x: {
+                type: 'category',
+                label: {
+                    text: x_axis_title,
+                    position: 'outer-center'
+                }
+                ,
+                tick: {
+                    rotate: -35,
+                    multiline: false
+                }
+                ,
+                height: 100
+
+            },
+            y: {
+                label: {
+                    text: columns[1].unitsLabel,
+                    position: 'outer-middle'
+                }
+            }
+        },
+        legend: {
+            show: false
+        },
+        color: {
+            pattern: ['#ddd']
+        }
+    } );
+}
+
+function createTemporalChart( indicators_list )
+{
+    var x_axis_id = 'geoname';
+    var x_axis_title = 'Local authority';
+    var chart_detail_level = DetailLevel.LA;
+
+    function getChartColumns() {
+        var keys = dataset.latestIndicatorKeys( detail_level );
+        var indicators = keys.map( function(key) {
+            return dataset.indicator(key, chart_detail_level);
+        });
+
+        var columns = indicators.map( function(indicator) {
+            return [ indicator.iterationTitle ].concat(
                 indicator.data.filter(function (value, index) {
 //                     return ! geoCodeInRange( DetailLevel.BIG, indicator.geoCodes[index] );
                     return true; // Including all areas. Not refactoring yet.
@@ -222,7 +299,7 @@ function updateChartForMeasure( indicator )
     chart.axis.labels( {
         y: indicator.chartYAxisLabel ? indicator.chartYAxisLabel : indicator.unitsLabel
     } );
-    chart.show( indicator.title );
+    chart.show( indicator.iterationTitle );
 }
 
 //     function selectCategory( category )
@@ -267,9 +344,10 @@ function selectIndicator( indicator )
 
     jQuery( '#description-link' )
     .empty()
-    .append( '<p>Read more <a href="/poverty-monitor/indicator-descriptions/?name='
+    .append( '<p>For further information about this data set, please see the accompanying "\
+<a href="/poverty-monitor/indicator-descriptions/?name='
             + encodeURIComponent(indicator.title)
-            + '">about this indicator</a>.</p>'  );
+            + '">About this indicator</a>" page.</p>'  );
 
     updateSelectorForMeasure( indicator );
     if ( chart ) {
@@ -376,35 +454,30 @@ function drawTable ( indicator )
 //
 function setInitialIndicator() {
 
-    // Does the URL indicate a measure to be shown?
+    // Does the URL say which indicator should be shown?
     var indicator_name = getParameterFromQueryString( 'measure' );
-    if ( indicator_name ) {
+    if ( povmon_dataset.isIndicatorName(indicator_name) ) {
 
-        // TO DO:
-        // Currently we are expecting an iteration key in the query string,
-        // BUT we are more likely to get an indicator key or an indicator
-        // name. We need to add a fn to the PovmonDataset to obtain the
-        // latest iteration of a given indicator.
+        // Query string contained information about the indicator to show.
+        var iteration_keys =
+            povmon_dataset.getIterationsForDisplayFromIndicatorName(
+                indicator_name, detail_level );
 
-        var iteration_key = povmon_dataset.getLatestIndicatorKeyFromName( indicator_name, detail_level );
-        if ( iteration_key ) {
-            var indicator = povmon_dataset.indicator( iteration_key, detail_level );
-            if ( indicator ) {
-                console.debug( ["Initialising with indicator found from query string", iteration_key, indicator] );
-                selectIndicator( indicator );
-                return;
-            }
+        if ( iterations ) {
+            console.debug( ["Initialising with indicator found from query string", iteration_key, indicator] );
+            selectIndicator( iterations );
+            return;
         }
 
+        // Requested indicator has no data at this detail level.
         jQuery('#user-messages').css("display", "");
         jQuery('#user-messages li').text(
             'Information for '+indicator_name+' is not available at this detail level.'
         );
     }
 
-    // No measure indicated by URL. Use default.
-    console.debug( 'No valid indicator ("' + iteration_key + '") found from query string' );
-//     console.debug( detail_level );
+    // URL did not identify an indicator.
+    console.debug( 'No loadable indicator found in query string ("' + indicator_name + '")' );
     selectIndicator( povmon_dataset.indicator(
         povmon_dataset.latestIndicatorKeys(detail_level)[0],
         detail_level

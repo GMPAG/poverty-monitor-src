@@ -44,12 +44,12 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
 
     // Not calculating latestIndicatorKeys immediately, because doing so
     // requires access to member functions that are not yet defined.
-    var latestIndicatorKeys = {};
+    var latestIterationKeys = {};
 
-    var getLatestIndicatorKeys = function( detail_level ) {
+    var classifyIterationKeys = function( detail_level ) {
 
         var iterations = {};
-        that.allIndicatorKeys().forEach( function(key) {
+        that.allIterationKeys().forEach( function(key) {
 
             if ( isEmptyIteration(key, detail_level) ) {
                 // Don't consider using this iteration of the indicator. It has no data.
@@ -60,7 +60,7 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
 
             // Is the key invalid?
             if ( ! frags  ||  ! isFinite(frags.iterationId) ) {
-                console.error( ["Invalid indicator key!", key, frags] );
+                console.error( ["Invalid iteration key!", key, frags] );
                 return;
             }
 
@@ -171,7 +171,7 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
 
     ////// Privileged ///////
 
-    this.allIndicatorKeys = function() {
+    this.allIterationKeys = function() {
         // Collect all the user defined columns from the datasets.
         var result = datasets.reduce( function(acc, val) {
             return acc.concat( val.userDefinedColumnNames() );
@@ -185,6 +185,13 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
 
     // Get the keys for the latest iteration of each indicator.
     this.latestIndicatorKeys = function(detail_level) {
+        if ( ! latestIndicatorKeys[detail_level] ) {
+            latestIndicatorKeys[detail_level] = getLatestIndicatorKeys(detail_level);
+        }
+        return latestIndicatorKeys[detail_level];
+    }
+
+    this.displayableIndicatorKeys = function(detail_level) {
         if ( ! latestIndicatorKeys[detail_level] ) {
             latestIndicatorKeys[detail_level] = getLatestIndicatorKeys(detail_level);
         }
@@ -207,6 +214,17 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
         return null;
     }
 
+    this.getDisplayableIndicatorKeysFromName = function( indicator_name, detail_level ) {
+        var root = this.getIndicatorRootKeyFromName( indicator_name );
+        var keys = this.latestIndicatorKeys(detail_level);
+        for ( var i = 0; i < keys.length; i++ ) {
+            if ( keys[i].indexOf(root) == 0 ) {
+                return keys[i];
+            }
+        }
+        return null;
+    }
+
     this.getIndicatorRootKeyFromName = function( indicator_name ) {
         var root_keys = indicator_metadata.userDefinedColumnNames();
         for ( var i = 0; i < root_keys.length; i++ ) {
@@ -215,6 +233,10 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
             };
         }
         return null;
+    }
+
+    this.isIndicatorName = function( name ) {
+        return !!this.getIndicatorRootKeyFromName( name );
     }
 
     // Get the data for a given indicator.
@@ -275,6 +297,9 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
         var title = indicatorProperty(key, "Indicator");
         result.title = title ? title : "";
 
+        var iterTitle = iterationProperty(key, "VARLABEL");
+        result.iterationTitle = iterTitle ? iterTitle : "";
+
         result.chartYAxisLabel =
             indicatorProperty(key, "Y_AXIS_LABEL_"+detail_level.toUpperCase());
 
@@ -282,7 +307,6 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
         result.mapLabel = label ? label : "";
 
         var intro = indicatorProperty(key, "VIS_PAGE_INTRO_"+detail_level.toUpperCase());
-        console.debug( intro );
         result.visualisationIntroText = intro ? intro : "";
 
         // NOTE: Not a function. We immediately call the anon fn to get a value
