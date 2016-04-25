@@ -373,7 +373,7 @@ function onMeasureClicked(e)
 
 function createSelector( dataset )
 {
-    dataset.latestIndicatorKeys(detail_level).forEach( function (key)
+    dataset.displayableIndicatorKeys(detail_level).forEach( function (key)
                 {
                     //             jQuery( '#measure-selector .top-level li' ).click( onCategoryClicked );
 
@@ -459,7 +459,7 @@ function setInitialIndicator() {
     if ( povmon_dataset.isIndicatorName(indicator_name) ) {
 
         // Query string contained information about the indicator to show.
-        var iteration_keys =
+        var iterations =
             povmon_dataset.getIterationsForDisplayFromIndicatorName(
                 indicator_name, detail_level );
 
@@ -478,11 +478,33 @@ function setInitialIndicator() {
 
     // URL did not identify an indicator.
     console.debug( 'No loadable indicator found in query string ("' + indicator_name + '")' );
-    selectIndicator( povmon_dataset.indicator(
-        povmon_dataset.latestIndicatorKeys(detail_level)[0],
-        detail_level
+    selectIndicator(
+        povmon_dataset.getIterationsForDisplayFromIndicatorName(
+            // TO DO: Get name of an indicator with data at requested detail level
+            AN_INDICATOR_NAME,
+            detail_level
     ));
 }
+
+
+// To do:
+//             Remove all assumptions about single iteration for display
+//             Change nomenclature to be clear between iteration and indicator
+// To do:
+//             Remove all assumptions about single iteration for display
+//             Change nomenclature to be clear between iteration and indicator
+// To do:
+//             Remove all assumptions about single iteration for display
+//             Change nomenclature to be clear between iteration and indicator
+// To do:
+//             Remove all assumptions about single iteration for display
+//             Change nomenclature to be clear between iteration and indicator
+// To do:
+//             Remove all assumptions about single iteration for display
+//             Change nomenclature to be clear between iteration and indicator
+// To do:
+//             Remove all assumptions about single iteration for display
+//             Change nomenclature to be clear between iteration and indicator
 
 
 // HACK??? Asynchrous creation of map and other page elements means that

@@ -46,7 +46,7 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
     // requires access to member functions that are not yet defined.
     var latestIterationKeys = {};
 
-    var classifyIterationKeys = function( detail_level ) {
+    var getLatestIterationKeys = function( detail_level ) {
 
         var iterations = {};
         that.allIterationKeys().forEach( function(key) {
@@ -171,6 +171,30 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
 
     ////// Privileged ///////
 
+    // Get the keys for the latest iteration of each indicator.
+    this.latestIndicatorKeys = function(detail_level) {
+        if ( ! latestIndicatorKeys[detail_level] ) {
+            latestIndicatorKeys[detail_level] = getLatestIterationKeys(detail_level);
+        }
+        return latestIndicatorKeys[detail_level];
+    }
+
+    // How to display the indicator name in a menu item.
+    this.getMenuItemLabel = function(iteration_key) {
+        return indicatorProperty( iteration_key, "Indicator" );
+    }
+
+    this.getLatestIterationKeyFromName = function( indicator_name, detail_level ) {
+        var root = this.getIndicatorKeyFromName( indicator_name );
+        var keys = this.latestIndicatorKeys(detail_level);
+        for ( var i = 0; i < keys.length; i++ ) {
+            if ( keys[i].indexOf(root) == 0 ) {
+                return keys[i];
+            }
+        }
+        return null;
+    }
+
     this.allIterationKeys = function() {
         // Collect all the user defined columns from the datasets.
         var result = datasets.reduce( function(acc, val) {
@@ -183,49 +207,53 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
         });
     }
 
-    // Get the keys for the latest iteration of each indicator.
-    this.latestIndicatorKeys = function(detail_level) {
-        if ( ! latestIndicatorKeys[detail_level] ) {
-            latestIndicatorKeys[detail_level] = getLatestIndicatorKeys(detail_level);
+    this.iterationKeysByIndicator = function( indicator_key ) {
+        var prefix = indicator_key + '_';
+        return this.allIterationKeys().filter( function( iteration_key ) {
+            return 0 == iteration_key.indexOf(prefix);
+        });
+    }
+
+    this.displayableIterationKeys = function( indicator_key, detail_level ) {
+        var iteration_keys = this.iterationKeysByIndicator(indicator_key);
+        if ( iteration_keys.length == 0 ) {
+            return null;
         }
-        return latestIndicatorKeys[detail_level];
-    }
 
-    this.displayableIndicatorKeys = function(detail_level) {
-        if ( ! latestIndicatorKeys[detail_level] ) {
-            latestIndicatorKeys[detail_level] = getLatestIndicatorKeys(detail_level);
+        var nonZeroIterations = iteration_keys.filter( iteration_key ) {
+            // To do: Check data not empty at current detail_level.
+            // To do: Check data not empty at current detail_level.
+            // To do: Check data not empty at current detail_level.
+            // To do: Check data not empty at current detail_level.
+            // To do: Check data not empty at current detail_level.
+        });
+
+        if ( nonZeroIterations.length == 0 ) {
+            return null;
         }
-        return latestIndicatorKeys[detail_level];
-    }
 
-    // How to display the indicator name in a menu item.
-    this.getMenuItemLabel = function(iteration_key) {
-        return indicatorProperty( iteration_key, "Indicator" );
-    }
-
-    this.getLatestIndicatorKeyFromName = function( indicator_name, detail_level ) {
-        var root = this.getIndicatorRootKeyFromName( indicator_name );
-        var keys = this.latestIndicatorKeys(detail_level);
-        for ( var i = 0; i < keys.length; i++ ) {
-            if ( keys[i].indexOf(root) == 0 ) {
-                return keys[i];
-            }
+        var result = nonZeroIterations.filter( function( iteration_key ) {
+            // To do: check "for display" flag
+            // To do: check "for display" flag
+            // To do: check "for display" flag
+            // To do: check "for display" flag
+            // To do: check "for display" flag
+            // To do: check "for display" flag
+        });
+        if ( result.length > 0 ) {
+            return result;
+        } else {
+            // Return the most recent iteration key.
+            // ASSUMPTION: The default sort will put the keys in chronological order.
+            return [ result.sort().pop() ];
         }
-        return null;
     }
 
-    this.getDisplayableIndicatorKeysFromName = function( indicator_name, detail_level ) {
-        var root = this.getIndicatorRootKeyFromName( indicator_name );
-        var keys = this.latestIndicatorKeys(detail_level);
-        for ( var i = 0; i < keys.length; i++ ) {
-            if ( keys[i].indexOf(root) == 0 ) {
-                return keys[i];
-            }
-        }
-        return null;
+    this.isIndicatorName = function( name ) {
+        return !!this.getIndicatorKeyFromName( name );
     }
 
-    this.getIndicatorRootKeyFromName = function( indicator_name ) {
+    this.getIndicatorKeyFromName = function( indicator_name ) {
         var root_keys = indicator_metadata.userDefinedColumnNames();
         for ( var i = 0; i < root_keys.length; i++ ) {
             if ( indicator_metadata.value( INDICATOR_NAME_ROW_INDEX, root_keys[i] ) == indicator_name ) {
@@ -235,8 +263,11 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
         return null;
     }
 
-    this.isIndicatorName = function( name ) {
-        return !!this.getIndicatorRootKeyFromName( name );
+    this.getIterationsForDisplayFromIndicatorName = function(name) {
+        // get indicator key from name
+        var indicator_key = this.getIndicatorKeyFromName(name);
+        var keys_for_display =
+            this.getDisplayableIterationKeysFromIndicatorKey( indicator_key );
     }
 
     // Get the data for a given indicator.
