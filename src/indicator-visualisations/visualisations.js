@@ -261,11 +261,15 @@ function selectIndicator( indicator )
 {
     jQuery( '#measure-name' ).text( indicator.title );
 
-    jQuery( '#description-link p' ).remove();
-    jQuery( '#description-link' ).append(
-        '<p><a href="/poverty-monitor/indicator-descriptions/?name='
-        + encodeURIComponent(indicator.title)
-        + '">About this indicator</a>.</p>'  );
+    jQuery( '#intro-text' )
+    .empty()
+    .append( paragraphise(indicator.visualisationIntroText) );
+
+    jQuery( '#description-link' )
+    .empty()
+    .append( '<p>Read more <a href="/poverty-monitor/indicator-descriptions/?name='
+            + encodeURIComponent(indicator.title)
+            + '">about this indicator</a>.</p>'  );
 
     updateSelectorForMeasure( indicator );
     if ( chart ) {

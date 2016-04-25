@@ -281,6 +281,10 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
         var label = indicatorProperty(key, "MAP_LABEL_"+detail_level.toUpperCase());
         result.mapLabel = label ? label : "";
 
+        var intro = indicatorProperty(key, "VIS_PAGE_INTRO_"+detail_level.toUpperCase());
+        console.debug( intro );
+        result.visualisationIntroText = intro ? intro : "";
+
         // NOTE: Not a function. We immediately call the anon fn to get a value
         result.unitsLabel = function() {
             var label = iterationProperty(key, "MEASUREUNIT_SYMBOL_"+detail_level.toUpperCase());
