@@ -399,45 +399,76 @@ function createSelector( dataset )
 
 function drawTable ( indicator )
 {
-    if ( table ) {
-        // This fn is in the API docs but console says it does not exist.
-        // table.destroy( true );
+//     if ( table ) {
+//         // This fn is in the API docs but console says it does not exist.
+//         // table.destroy( true );
+//     }
 
-        jQuery('#table').empty();
+    // Get rid of any previous table.
+    jQuery('#table').empty();
+
+    // Establish the number of rows in the table.
+    var num_rows = indicator.iterations[0].values.length;
+
+    // Check for a dataset that we do not know how to handle.
+    // i.e. One with a different number of rows.
+    for ( var i=1; i<indicator.iterations.length; i++ ) {
+        if ( indicator.iterations[i].values.length != num_rows ) {
+
+            debugger;
+
+            console.error("\
+Iterations for the current indicator have different numbers of values!\n\
+They may be based on different goegraphical areas." );
+            console.error( indicator );
+
+            jQuery('#table').append("<p>\
+Iterations for the current indicator have different numbers of values!\
+They may be based on different goegraphical areas.</p>" );
+
+            return;
+        }
     }
 
-    jQuery('#table').append( '<table cellpadding="0" cellspacing="0" border="0" class="display"></table>' );
+    // Create an empty table.
+    jQuery('#table').append(
+        '<table cellpadding="0" cellspacing="0" border="0" class="display"></table>' );
 
-    var is_displayable = function(x) { return x!=='' && x!==null; };
+    // Generate the table data and metadata.
 
     var config = {
-        data : indicator.geoNames.map( function ( geoname, index ) {
-
-            var result = [
-                geoname,
-                // ASSUMPTION: Negative data is invalid. Our current data source
-                // cannot contain nulls, hence the use of negative numbers.
-                indicator.data[index] >= 0 ? indicator.data[index] : "No valid data"
-            ];
-            return result;
-        } ),
-        columns : [
-            { title : "Area" },
-            {
-                title : indicator.title,
-                // Data may contain strings that describe missing data points.
-                // Force sorting to work for numbers rather than words.
-                type : "num"
-            }
-        ],
-        order : [[ 1, "desc" ]]
+        // Order column by the most recent data.
+        order:[[ indicator.numIterations, "desc" ]]
     };
 
-    if ( indicator.data.length <= 20 ) {
-        config.paging = false;                   // Turn off paging
-        config.info = false;                     // Turn off paging info
-        config.bFilter = false;                  // Turn off search
-        config.pageLength = indicator.data.length;  // Remove empty rows
+    config.data = indicator.iterations[0].geoNames.map( function ( geoname, index ) {
+            var values = indicator.iterations.map( function(iteration) {
+                var value = iteration.values[index];
+                // ASSUMPTION: Negative data is invalid. Our current data source
+                // cannot contain nulls, hence the use of negative numbers.
+                return value >= 0 ? value : "No valid data";
+            });
+        values.unshift(geoname);
+        return values;
+    } );
+
+    config.columns = indicator.iterations.map( function(iteration) {
+        return {
+            title : iteration.title,
+            // Data may contain strings that describe missing data points.
+            // Force sorting to work for numbers rather than words.
+            type : "num"
+        }
+    });
+    config.columns.unshift( { title : "Area" } );
+
+    console.debug(config);
+
+    if ( num_rows <= 20 ) {
+        config.paging = false;         // Turn off paging
+        config.info = false;           // Turn off paging info
+        config.bFilter = false;        // Turn off search
+        config.pageLength = num_rows;  // Remove empty rows
 
         // Colour the background of wider regional rows differently.
         config.rowCallback = function( row, data, index ) {

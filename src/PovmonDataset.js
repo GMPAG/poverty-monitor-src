@@ -25,12 +25,12 @@ var ITERATION_FOR_DISPLAY_ROW_KEY = "DISPLAY_ON_POVMON";
 
 
 
-var geoCodeInRange = function(detailLevel, code) {
-    if ( ! detailLevel ) {
+var geoCodeInRange = function(detail_level, code) {
+    if ( ! detail_level ) {
         debugger;
     }
-    return GeoCodeRanges[detailLevel].MIN <= code &&
-        code <= GeoCodeRanges[detailLevel].MAX;
+    return GeoCodeRanges[detail_level].MIN <= code &&
+        code <= GeoCodeRanges[detail_level].MAX;
 }
 
 
@@ -296,7 +296,8 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
             return iteration;
         });
 
-        result.latestIteration = result.iterations[result.iterations.length-1];
+        result.numIterations = result.iterations.length;
+        result.latestIteration = result.iterations[result.numIterations-1];
 
         // Add other data and functions to the indicator.
         result.detailLevel = detail_level;
