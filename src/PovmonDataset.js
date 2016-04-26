@@ -17,6 +17,7 @@ var GEO_CODE_COLUMN_NAME = 'geo_code';
 var GEO_NAME_COLUMN_NAME = 'geo_name';
 
 var INDICATOR_NAME_ROW_KEY = "Indicator";
+var ITERATION_NAME_ROW_KEY = "VARLABEL";
 var ITERATION_FOR_DISPLAY_ROW_KEY = "DISPLAY_ON_POVMON";
 
 //
@@ -81,7 +82,11 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
                 return column[index];
             }
         }
-        console.error( ["Unknown property requested!", {"key":column_name, "property_name":property_name}] );
+
+        console.error( [
+            "Unknown property or column name!",
+            {column_name:column_name, property_name:property_name}
+        ] );
         return null
     }
 
@@ -176,7 +181,10 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
     //             most recent non-empty iteration should be displayed.
     var displayableIterationKeys = function( indicator_key, detail_level ) {
 
-        var iteration_keys = iterationKeysByIndicator(indicator_key);
+        // Note that we are sorting the iteration_keys to put them in
+        // chronological order.
+        // ASSUMPTION: The default sort will order the keys chronologically.
+        var iteration_keys = iterationKeysByIndicator(indicator_key).sort();
         if ( iteration_keys.length == 0 ) {
             return null;
         }
@@ -195,10 +203,9 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
             return result;
         } else {
             // Return the most recent iteration key.
-            // ASSUMPTION: If no iterations are marked for display then the
-            //             most recent non-empty iteration should be displayed.
-            // ASSUMPTION: The default sort will put the keys in chronological order.
-            return [ result.sort().pop() ];
+            // ASSUMPTION: The most recent iteration is a valid iteration for display.
+            // ASSUMPTION: The most recent iteration is at the end of the array
+            return [ nonZeroIterations.pop() ];
         }
     }
 
@@ -250,7 +257,7 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
         var result = {};
         result.iterations = keys_for_display.map( function(iteration_key) {
 
-            var dataset = datasetContainingColumn(iteration_key, column_index);
+            var dataset = datasetContainingColumn(iteration_key);
             var values =  dataset.column(iteration_key);
             var geoCodes = dataset.column(GEO_CODE_COLUMN_NAME);
             var geoNames = dataset.column(GEO_NAME_COLUMN_NAME);
@@ -269,9 +276,11 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
             // Add other data and functions to the iteration.
             iteration.datasetName = dataset.name;
             iteration.key = iteration_key;
+            iteration.title =
+                iterationProperty(iteration_key, ITERATION_NAME_ROW_KEY) || "";
 
-            var iterTitle = iterationProperty(key, "VARLABEL");
-            result.iterationTitle = iterTitle ? iterTitle : "";
+            iteration.unitsLabel = iterationProperty(
+                iteration_key, "MEASUREUNIT_SYMBOL_"+detail_level.toUpperCase()) || "";
 
             iteration.min = function() {
                 // ASSUMPTION: Falsey values are missing values, not zero.
@@ -287,18 +296,17 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
             return iteration;
         });
 
+        result.latestIteration = result.iterations[result.iterations.length-1];
+
         // Add other data and functions to the indicator.
         result.detailLevel = detail_level;
-        result.title = indicatorProperty(indicator_key, "INDICATOR_NAME_ROW_KEY") || "";
+        result.title = indicatorProperty(indicator_key, INDICATOR_NAME_ROW_KEY) || "";
 
         result.mapLabel = indicatorProperty(
             indicator_key, "MAP_LABEL_"+detail_level.toUpperCase()) || "";
 
         result.visualisationIntroText = indicatorProperty(
             indicator_key, "VIS_PAGE_INTRO_"+detail_level.toUpperCase()) || "";
-
-        result.unitsLabel = indicatorProperty(
-            indicator_key, "MEASUREUNIT_SYMBOL_"+detail_level.toUpperCase()) || "";
 
         result.chartYAxisLabel =
             indicatorProperty(indicator_key, "Y_AXIS_LABEL_"+detail_level.toUpperCase());

@@ -175,12 +175,12 @@ function createTemporalChart( indicators_list )
     } );
 }
 
-function getMapSql( indicator )
+function getMapSql( iteration, detail_level )
 {
     var sql = 'SELECT cartodb_id, geo_name, the_geom, the_geom_webmercator, '
-    + indicator.key + " as indicator, '" + indicator.unitsLabel + "' as units FROM "
-    + indicator.datasetName + '_with_' + indicator.detailLevel
-    + '_boundaries WHERE the_geom IS NOT NULL AND 0.0 <= ' + indicator.key;
+    + iteration.key + " as indicator, '" + iteration.unitsLabel + "' as units FROM "
+    + iteration.datasetName + '_with_' + detail_level
+    + '_boundaries WHERE the_geom IS NOT NULL AND 0.0 <= ' + iteration.key;
     console.debug(sql);
     return sql;
 }
@@ -265,14 +265,18 @@ text-placement-type: simple;   \n\
 
 function updateMapForMeasure( indicator )
 {
+//     console.debug(indicator);
+    var iteration = indicator.latestIteration;
+
     jQuery('#map-label').text(indicator.mapLabel)
 
-    map.getLayers()[1].getSubLayers()[0].setSQL( getMapSql(indicator) );
+    map.getLayers()[1].getSubLayers()[0].setSQL(
+        getMapSql(iteration, indicator.detailLevel) );
 
     // Remove big things from the data. They will not be shown on the map and
     // should not affect the chloropleth.
-    var data = indicator.data.filter( function(val, index) {
-        return val >= 0  &&  ! geoCodeInRange( DetailLevel.BIG, indicator.geoCodes[index] );
+    var data = iteration.values.filter( function(val, index) {
+        return ! geoCodeInRange( DetailLevel.BIG, iteration.geoCodes[index] );
     });
     var min = Math.min.apply(null, data);
     var max = Math.max.apply(null, data);
@@ -288,8 +292,8 @@ function updateMapForMeasure( indicator )
         jQuery( '.cartodb-legend-stack .min' ).text( "Least deprived" );
         jQuery( '.cartodb-legend-stack .max' ).text( "Most deprived" );
     } else {
-        jQuery( '.cartodb-legend-stack .min' ).text( min + indicator.unitsLabel );
-        jQuery( '.cartodb-legend-stack .max' ).text( max + indicator.unitsLabel );
+        jQuery( '.cartodb-legend-stack .min' ).text( min + iteration.unitsLabel );
+        jQuery( '.cartodb-legend-stack .max' ).text( max + iteration.unitsLabel );
     }
 }
 
@@ -478,7 +482,7 @@ function setInitialIndicator() {
     console.debug( 'No loadable indicator found in query string ("' + indicator_name + '")' );
     selectIndicator(
         povmon_dataset.indicator(
-            povmon_dataset.availableIndicators()[0].name, detail_level
+            povmon_dataset.availableIndicators(detail_level)[0].name, detail_level
     ));
 }
 
