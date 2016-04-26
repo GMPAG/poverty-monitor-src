@@ -111,7 +111,7 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
        );
     }
 
-    // Does the given iteration have valid values at the given detail_level?
+    // Does the given iteration have no valid values at the given detail_level?
     var isEmptyIteration = function( iteration_key, detail_level ) {
         var dataset = datasetContainingColumn(iteration_key);
         var geo_codes = dataset.column('geo_code');

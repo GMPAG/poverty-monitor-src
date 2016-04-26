@@ -34,13 +34,25 @@ function recreateChart( indicator )
     var chart_detail_level = DetailLevel.LA;
 
 
-    var HACK = 0;
+    var HACK_SUFFIX = 1;
+    var HACK_TITLES = [];
     var columns = indicator.iterations.map( function(iteration) {
-        HACK++;
-        return [ iteration.title+HACK ].concat( iteration.values );
+        var title = iteration.title;
+
+        // Identical data titles will break the chart.
+        // Make sure there are no identical data titles.
+        if ( -1 != HACK_TITLES.indexOf(title) ) {
+            // ASSUMPTION: Adding an integer to the title will be enough to
+            //             make it unique.
+            title += ' '+HACK_SUFFIX;
+            HACK_SUFFIX++;
+        }
+        HACK_TITLES.push(title);
+
+        return [ title ].concat( iteration.values );
     });
     columns.unshift( [ x_axis_id ].concat( indicator.iterations[0].geoNames ));
-    console.debug(columns);
+//     console.debug(columns);
 
 
     var config = {
@@ -76,14 +88,15 @@ function recreateChart( indicator )
                 }
             }
         },
-        legend: {
-            show: false
-        },
         color : {
             pattern: [ '#009ec8', '#79bb59', '#cad401', '#00a5aa' ]
         }
     };
 
+//     config.legend = indicator.numIterations == 1 ? {show:false} : {show:true};
+    config.legend = {show:true};
+
+//     console.debug(config);
     c3.generate(config);
 }
 
