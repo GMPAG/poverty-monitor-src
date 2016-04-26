@@ -373,7 +373,7 @@ function onMeasureClicked(e)
 
 function createSelector( dataset )
 {
-    dataset.displayableIndicatorKeys(detail_level).forEach( function (key)
+    dataset.availableIndicators(detail_level).forEach( function (indicator)
                 {
                     //             jQuery( '#measure-selector .top-level li' ).click( onCategoryClicked );
 
@@ -383,11 +383,11 @@ function createSelector( dataset )
                     jQuery( '#measure-selector ul' )
                     .append(
                         jQuery('<li>')
-                        .attr( 'measure', key )
+                        .attr( 'measure', indicator.name )
                         .click( onMeasureClicked )
 //                         .addClass( li_class )
                         .append(
-                            jQuery( '<a>' + dataset.getMenuItemLabel(key) + '</a>' )
+                            jQuery( '<a>' + indicator.name + '</a>' )
                         )
                     );
                 } );
@@ -455,17 +455,15 @@ function drawTable ( indicator )
 function setInitialIndicator() {
 
     // Does the URL say which indicator should be shown?
-    var indicator_name = getParameterFromQueryString( 'measure' );
-    if ( povmon_dataset.isIndicatorName(indicator_name) ) {
+    var indicator_name = getParameterFromQueryString( 'measure' ) || "";
+    if ( indicator_name && povmon_dataset.isIndicatorName(indicator_name) ) {
 
         // Query string contained information about the indicator to show.
-        var iterations =
-            povmon_dataset.getIterationsForDisplayFromIndicatorName(
-                indicator_name, detail_level );
+        var indicator = povmon_dataset.indicator( indicator_name, detail_level );
 
-        if ( iterations ) {
-            console.debug( ["Initialising with indicator found from query string", iteration_key, indicator] );
-            selectIndicator( iterations );
+        if ( indicator ) {
+            console.debug( ["Initialising with indicator found from query string", indicator_name, indicator] );
+            selectIndicator( indicator );
             return;
         }
 
@@ -479,32 +477,10 @@ function setInitialIndicator() {
     // URL did not identify an indicator.
     console.debug( 'No loadable indicator found in query string ("' + indicator_name + '")' );
     selectIndicator(
-        povmon_dataset.getIterationsForDisplayFromIndicatorName(
-            // TO DO: Get name of an indicator with data at requested detail level
-            AN_INDICATOR_NAME,
-            detail_level
+        povmon_dataset.indicator(
+            povmon_dataset.availableIndicators()[0].name, detail_level
     ));
 }
-
-
-// To do:
-//             Remove all assumptions about single iteration for display
-//             Change nomenclature to be clear between iteration and indicator
-// To do:
-//             Remove all assumptions about single iteration for display
-//             Change nomenclature to be clear between iteration and indicator
-// To do:
-//             Remove all assumptions about single iteration for display
-//             Change nomenclature to be clear between iteration and indicator
-// To do:
-//             Remove all assumptions about single iteration for display
-//             Change nomenclature to be clear between iteration and indicator
-// To do:
-//             Remove all assumptions about single iteration for display
-//             Change nomenclature to be clear between iteration and indicator
-// To do:
-//             Remove all assumptions about single iteration for display
-//             Change nomenclature to be clear between iteration and indicator
 
 
 // HACK??? Asynchrous creation of map and other page elements means that
@@ -525,7 +501,7 @@ function makePageElements( dataset )
     createSelector( dataset );
 
     if ( detail_level == DetailLevel.LA ) {
-        createChart( dataset );
+//         createChart( dataset );
     }
 
     onCallbackComplete();
@@ -557,7 +533,7 @@ function createMap ( mapId )
     } );
 }
 
-
+// Stole this from somewhere. Probably StackOverflow.
 function getParameterFromQueryString(name) {
     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
@@ -571,15 +547,14 @@ function getParameterFromQueryString(name) {
 function loadData() {
     loadPovmonDataset(
         ['indicators_geo2001_2016_04_05_a','indicators_geo2011_2016_04_05_a'],
-//         ['table_2001','table_2011'],
         'indicator_metadata_2016_04_05',
         'iteration_metadata_2016_04_05',
         makePageElements
     );
 }
 
-// And go...
 
+// And go...
 switch ( getParameterFromQueryString( 'level' ) )
 {
     case 'local-authority':

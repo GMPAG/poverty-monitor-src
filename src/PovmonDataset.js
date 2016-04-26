@@ -16,9 +16,8 @@ var INDICATOR_PROPERTY_NAMES_COLUMN_NAME = 'varname';
 var GEO_CODE_COLUMN_NAME = 'geo_code';
 var GEO_NAME_COLUMN_NAME = 'geo_name';
 
-// ASSUMPTION: Indicator names are in the first row of the indicator metadata.
-// TO DO: ??? Calculate from INDICATOR_NAME_ROW_KEY ???
-var INDICATOR_NAME_ROW_INDEX = 0;
+var INDICATOR_NAME_ROW_KEY = "Indicator";
+var ITERATION_FOR_DISPLAY_ROW_KEY = "DISPLAY_ON_POVMON";
 
 //
 ////////////
@@ -42,97 +41,77 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
     // Give private functions and inner functions access to this.
     var that = this;
 
-    // Not calculating latestIndicatorKeys immediately, because doing so
-    // requires access to member functions that are not yet defined.
-    var latestIterationKeys = {};
-
-    var getLatestIterationKeys = function( detail_level ) {
-
-        var iterations = {};
-        that.allIterationKeys().forEach( function(key) {
-
-            if ( isEmptyIteration(key, detail_level) ) {
-                // Don't consider using this iteration of the indicator. It has no data.
-                return;
+    // Find the dataset that contains the given column name.
+    // ASSUMPTION: The given column_name appears in only one dataset, or
+    // it is irrelevant which dataset with that column_name is chosen.
+    var datasetContainingColumn = function(column_name) {
+        for ( var i = 0; i < datasets.length; i++ ) {
+            if ( datasets[i].hasColumn(column_name) ) {
+                return datasets[i];
             }
-
-            var frags = getKeyFragments(key);
-
-            // Is the key invalid?
-            if ( ! frags  ||  ! isFinite(frags.iterationId) ) {
-                console.error( ["Invalid iteration key!", key, frags] );
-                return;
-            }
-
-            // Create, or add to, an array of iterations for the given key root
-            if ( iterations[frags.keyRoot] ) {
-                iterations[frags.keyRoot].push({"key":key, "iterationId":frags.iterationId});
-            } else {
-                iterations[frags.keyRoot] = [{"key":key, "iterationId":frags.iterationId}];
-            }
-        });
-//         console.debug(iterations);
-
-        var result = [];
-        for ( keyRoot in iterations ) {
-
-            var latest = {iterationId:-1};
-
-            iterations[keyRoot].forEach( function(v) {
-                if ( v.iterationId > latest.iterationId ) {
-                    latest = v;
-                }
-            });
-
-            result.push(latest.key);
         }
-//         console.debug(result);
-
-        return result;
+        // No column found with that name.
+        return null;
     }
 
-    var datasetColumn = function(key) {
+    // Get a column of data from the datasets.
+    // ASSUMPTION: The given column_name appears in only one dataset, or
+    // it is irrelevant which dataset the column is taken from.
+    var datasetColumn = function(column_name) {
         for ( var i = 0; i < datasets.length; i++ ) {
-            var column = datasets[i].column(key);
+            var column = datasets[i].column(column_name);
             if (column) {
                 return column;
             }
         }
+        // No column found with that name.
         return null;
+    }
+
+    // Get a property from metadata.
+    // Param propertyNamesColumnName is the name of a column that contains
+    // property names. Used this way, the dataset is a matrix keyed by column
+    // name and property name.
+    var metadataProperty = function(metadata, propertyNamesColumnName, column_name, property_name) {
+        var prop_names = metadata.column( propertyNamesColumnName );
+        var index = prop_names.indexOf( property_name );
+        if ( index > -1 ) {
+            var column = metadata.column(column_name);
+            if ( column ) {
+                return column[index];
+            }
+        }
+        console.error( ["Unknown property requested!", {"key":column_name, "property_name":property_name}] );
+        return null
     }
 
     // Get a metadata property of a specific indicator iteration.
     var iterationProperty = function(key, property_name) {
-        var prop_names = iteration_metadata.column( ITERATION_PROPERTY_NAMES_COLUMN_NAME );
-        var index = prop_names.indexOf( property_name );
-        if ( index > -1 ) {
-            return iteration_metadata.column(key)[index];
-        } else {
-            console.error( ["Unknown property name requested!", {"key":key, "property_name":property_name}] );
-            return null
-        }
+       return metadataProperty(
+           iteration_metadata,
+           ITERATION_PROPERTY_NAMES_COLUMN_NAME,
+           key,
+           property_name
+       );
     }
 
     // Get a metadata property of an indicator (applying to all iterations
     // of that indicator.)
     var indicatorProperty = function(key, property_name) {
-        var prop_names = indicator_metadata.column( INDICATOR_PROPERTY_NAMES_COLUMN_NAME );
-        var index = prop_names.indexOf( property_name );
-        if ( index > -1 ) {
-            var frags = getKeyFragments(key);
-            if ( frags ) {
-                return indicator_metadata.column(frags.keyRoot)[index];
-            }
-        }
-
-        console.error( ["Unknown key or property name requested!", {"key":key, "property_name":property_name}] );
-        return null
+       return metadataProperty(
+           indicator_metadata,
+           INDICATOR_PROPERTY_NAMES_COLUMN_NAME,
+           key,
+           property_name
+       );
     }
 
-    var isEmptyIteration = function( key, detail_level ) {
-        var dataset = datasetContainingColumn(key);
+    // Does the given iteration have valid values at the given detail_level?
+    var isEmptyIteration = function( iteration_key, detail_level ) {
+        var dataset = datasetContainingColumn(iteration_key);
         var geo_codes = dataset.column('geo_code');
-        var hasNonEmptyValues = dataset.column(key).some(function(value, index){
+        var hasNonEmptyValues =
+            dataset.column(iteration_key).some(function(value, index){
             // ASSUMPTION: Negative data is invalid. Our current data source
             // cannot contain nulls, hence the use of negative numbers.
             return value >= 0  &&  geoCodeInRange(detail_level, geo_codes[index]);
@@ -149,53 +128,31 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
             var frags = key.split(/_(\d{3})$/)
 
             // When I tested, there was an empty string at the end of the fragments.
-            // Remove empty strings.
+            // Remove any and all empty strings.
             frags = frags.filter(function(v){return v != "";});
 
             // Do we have the correct number of key fragments?
             if ( frags.length == 2 ) {
-                return { "keyRoot": frags[0], "iterationId": parseInt(frags[1]) };
-            } else {
-                return null;
-            }
-    }
+                var result = { "keyRoot": frags[0], "iterationId": parseInt(frags[1]) };
 
-    var datasetContainingColumn = function(key) {
-        for ( var i = 0; i < datasets.length; i++ ) {
-            if ( datasets[i].hasColumn(key) ) {
-                return datasets[i];
+                // ASSUMPTION: Iteration ID Must be a finite number.
+                if ( isFinite(frags.iterationId) ) {
+                    return result;
+                }
             }
-        }
+
         return null;
     }
 
-    ////// Privileged ///////
-
-    // Get the keys for the latest iteration of each indicator.
-    this.latestIndicatorKeys = function(detail_level) {
-        if ( ! latestIndicatorKeys[detail_level] ) {
-            latestIndicatorKeys[detail_level] = getLatestIterationKeys(detail_level);
-        }
-        return latestIndicatorKeys[detail_level];
+    var allIndicatorKeys = function() {
+        var result = indicator_metadata.userDefinedColumnNames().filter( function(name) {
+            return name != INDICATOR_PROPERTY_NAMES_COLUMN_NAME;
+        });
+//         console.debug(result);
+        return result;
     }
 
-    // How to display the indicator name in a menu item.
-    this.getMenuItemLabel = function(iteration_key) {
-        return indicatorProperty( iteration_key, "Indicator" );
-    }
-
-    this.getLatestIterationKeyFromName = function( indicator_name, detail_level ) {
-        var root = this.getIndicatorKeyFromName( indicator_name );
-        var keys = this.latestIndicatorKeys(detail_level);
-        for ( var i = 0; i < keys.length; i++ ) {
-            if ( keys[i].indexOf(root) == 0 ) {
-                return keys[i];
-            }
-        }
-        return null;
-    }
-
-    this.allIterationKeys = function() {
+    var allIterationKeys = function() {
         // Collect all the user defined columns from the datasets.
         var result = datasets.reduce( function(acc, val) {
             return acc.concat( val.userDefinedColumnNames() );
@@ -207,153 +164,144 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
         });
     }
 
-    this.iterationKeysByIndicator = function( indicator_key ) {
+    var iterationKeysByIndicator = function( indicator_key ) {
         var prefix = indicator_key + '_';
-        return this.allIterationKeys().filter( function( iteration_key ) {
+        return allIterationKeys().filter( function( iteration_key ) {
             return 0 == iteration_key.indexOf(prefix);
         });
     }
 
-    this.displayableIterationKeys = function( indicator_key, detail_level ) {
-        var iteration_keys = this.iterationKeysByIndicator(indicator_key);
+    // Get the keys of iterations tagged for display for a given indicator.
+    // ASSUMPTION: If no iterations are marked for display then the
+    //             most recent non-empty iteration should be displayed.
+    var displayableIterationKeys = function( indicator_key, detail_level ) {
+
+        var iteration_keys = iterationKeysByIndicator(indicator_key);
         if ( iteration_keys.length == 0 ) {
             return null;
         }
 
-        var nonZeroIterations = iteration_keys.filter( iteration_key ) {
-            // To do: Check data not empty at current detail_level.
-            // To do: Check data not empty at current detail_level.
-            // To do: Check data not empty at current detail_level.
-            // To do: Check data not empty at current detail_level.
-            // To do: Check data not empty at current detail_level.
+        var nonZeroIterations = iteration_keys.filter( function(iteration_key) {
+            return ! isEmptyIteration( iteration_key, detail_level );
         });
-
         if ( nonZeroIterations.length == 0 ) {
             return null;
         }
 
         var result = nonZeroIterations.filter( function( iteration_key ) {
-            // To do: check "for display" flag
-            // To do: check "for display" flag
-            // To do: check "for display" flag
-            // To do: check "for display" flag
-            // To do: check "for display" flag
-            // To do: check "for display" flag
+            return iterationProperty( iteration_key, ITERATION_FOR_DISPLAY_ROW_KEY );
         });
         if ( result.length > 0 ) {
             return result;
         } else {
             // Return the most recent iteration key.
+            // ASSUMPTION: If no iterations are marked for display then the
+            //             most recent non-empty iteration should be displayed.
             // ASSUMPTION: The default sort will put the keys in chronological order.
             return [ result.sort().pop() ];
         }
     }
 
-    this.isIndicatorName = function( name ) {
-        return !!this.getIndicatorKeyFromName( name );
-    }
-
-    this.getIndicatorKeyFromName = function( indicator_name ) {
-        var root_keys = indicator_metadata.userDefinedColumnNames();
-        for ( var i = 0; i < root_keys.length; i++ ) {
-            if ( indicator_metadata.value( INDICATOR_NAME_ROW_INDEX, root_keys[i] ) == indicator_name ) {
-                return root_keys[i];
+    var getIndicatorKeyFromName = function( indicator_name ) {
+        var keys = allIndicatorKeys();
+        for ( var i = 0; i < keys.length; i++ ) {
+            if ( indicatorProperty( keys[i], INDICATOR_NAME_ROW_KEY ) == indicator_name ) {
+                return keys[i];
             };
         }
         return null;
     }
 
-    this.getIterationsForDisplayFromIndicatorName = function(name) {
-        // get indicator key from name
-        var indicator_key = this.getIndicatorKeyFromName(name);
-        var keys_for_display =
-            this.getDisplayableIterationKeysFromIndicatorKey( indicator_key );
+    ////// Privileged ///////
+
+    // Get those indicators that have at least one displayable iteration at
+    // the given detail_level.
+    this.availableIndicators = function( detail_level ) {
+        var result = allIndicatorKeys().filter(
+            function(key) {
+                return !!displayableIterationKeys(key, detail_level);
+            }
+        ).map(
+            function(key) {
+                return {
+                    key:key,
+                    name:indicatorProperty(key,INDICATOR_NAME_ROW_KEY)
+                };
+            }
+        );
+//         console.debug(result);
+        return result;
+    }
+
+    this.isIndicatorName = function( name ) {
+        return !!getIndicatorKeyFromName( name );
     }
 
     // Get the data for a given indicator.
     // The returned object includes the relevant geographical IDs as well as
     // some utility functions.
-    this.indicator = function(key, detail_level) {
+    this.indicator = function(indicator_name, detail_level) {
 //         console.debug( detail_level );
-        var dataset = datasetContainingColumn(key);
 
-        if ( ! dataset ) {
-            return null;
-        }
+        var indicator_key = getIndicatorKeyFromName(indicator_name);
+        var keys_for_display =
+            displayableIterationKeys( indicator_key, detail_level );
 
-        var columns = {
-            data: dataset.column(key),
-            geoCodes: dataset.column(GEO_CODE_COLUMN_NAME),
-            geoNames: dataset.column(GEO_NAME_COLUMN_NAME)
-        };
+        var result = {};
+        result.iterations = keys_for_display.map( function(iteration_key) {
 
-        // Get the indexes of those rows relevant to the requested detail level
-        var desired_indexes =
-            columns.geoCodes.map(
-                function(code, index) {
-                    if ( geoCodeInRange( detail_level, code ) ) {
-                        return index;
-                    } else {
-                        return null;
-                    }
+            var dataset = datasetContainingColumn(iteration_key, column_index);
+            var values =  dataset.column(iteration_key);
+            var geoCodes = dataset.column(GEO_CODE_COLUMN_NAME);
+            var geoNames = dataset.column(GEO_NAME_COLUMN_NAME);
+
+            var iteration = { values:[], geoCodes:[], geoNames:[] };
+
+            // Get those rows relevant to the requested detail level
+            geoCodes.forEach( function(code, row_index) {
+                if ( geoCodeInRange( detail_level, code ) ) {
+                    iteration.values.push( values[row_index] );
+                    iteration.geoNames.push( geoNames[row_index] );
+                    iteration.geoCodes.push( geoCodes[row_index] );
                 }
-            ).filter( function(index) { return index != null; }  );
+            });
 
-        var result = { data:[], geoCodes:[], geoNames:[] };
+            // Add other data and functions to the iteration.
+            iteration.datasetName = dataset.name;
+            iteration.key = iteration_key;
 
-        // Get the rows relevant to the requested detail level.
-        desired_indexes.forEach( function(index) {
-            result.data.push( columns.data[index] );
-            result.geoNames.push( columns.geoNames[index] );
-            result.geoCodes.push( columns.geoCodes[index] );
+            var iterTitle = iterationProperty(key, "VARLABEL");
+            result.iterationTitle = iterTitle ? iterTitle : "";
+
+            iteration.min = function() {
+                // ASSUMPTION: Falsey values are missing values, not zero.
+                // To do: WRONG assumption!!!
+                return Math.min.apply(null, this.values.filter(function(x){return x;}) );
+            };
+            iteration.max = function() {
+                // ASSUMPTION: Falsey values are missing values, not zero.
+                // To do: WRONG assumption!!!
+                return Math.max.apply(null, this.values.filter(function(x){return x;}) );
+            };
+
+            return iteration;
         });
 
         // Add other data and functions to the indicator.
-        result.datasetName = dataset.name;
         result.detailLevel = detail_level;
-        result.key = key;
-        result.indicatorSlug = getKeyFragments(key).keyRoot;
+        result.title = indicatorProperty(indicator_key, "INDICATOR_NAME_ROW_KEY") || "";
 
-        result.min = function() {
-            // ASSUMPTION: Falsey values are missing values, not zero.
-            // To do: WRONG assumption!!!
-            return Math.min.apply(null, this.data.filter(function(x){return x;}) );
-        };
-        result.max = function() {
-            // ASSUMPTION: Falsey values are missing values, not zero.
-            // To do: WRONG assumption!!!
-            return Math.max.apply(null, this.data.filter(function(x){return x;}) );
-        };
+        result.mapLabel = indicatorProperty(
+            indicator_key, "MAP_LABEL_"+detail_level.toUpperCase()) || "";
 
-        var title = indicatorProperty(key, "Indicator");
-        result.title = title ? title : "";
+        result.visualisationIntroText = indicatorProperty(
+            indicator_key, "VIS_PAGE_INTRO_"+detail_level.toUpperCase()) || "";
 
-        var iterTitle = iterationProperty(key, "VARLABEL");
-        result.iterationTitle = iterTitle ? iterTitle : "";
+        result.unitsLabel = indicatorProperty(
+            indicator_key, "MEASUREUNIT_SYMBOL_"+detail_level.toUpperCase()) || "";
 
         result.chartYAxisLabel =
-            indicatorProperty(key, "Y_AXIS_LABEL_"+detail_level.toUpperCase());
-
-        var label = indicatorProperty(key, "MAP_LABEL_"+detail_level.toUpperCase());
-        result.mapLabel = label ? label : "";
-
-        var intro = indicatorProperty(key, "VIS_PAGE_INTRO_"+detail_level.toUpperCase());
-        result.visualisationIntroText = intro ? intro : "";
-
-        // NOTE: Not a function. We immediately call the anon fn to get a value
-        result.unitsLabel = function() {
-            var label = iterationProperty(key, "MEASUREUNIT_SYMBOL_"+detail_level.toUpperCase());
-            if ( label ) {
-                if ( label.match( /^\w/ ) ) {
-                    // label starts with a word character, so put a space
-                    // in front of it.
-                    label = ' ' + label;
-                }
-            } else {
-                label = '';
-            }
-            return label;
-        }();
+            indicatorProperty(indicator_key, "Y_AXIS_LABEL_"+detail_level.toUpperCase());
 
         return result;
     }
