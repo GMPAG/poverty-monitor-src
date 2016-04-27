@@ -197,7 +197,10 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
         }
 
         var result = nonZeroIterations.filter( function( iteration_key ) {
-            return iterationProperty( iteration_key, ITERATION_FOR_DISPLAY_ROW_KEY );
+            return iterationProperty(
+                iteration_key,
+                ITERATION_FOR_DISPLAY_ROW_KEY+'_'+detail_level.toUpperCase()
+            );
         });
         if ( result.length > 0 ) {
             return result;
