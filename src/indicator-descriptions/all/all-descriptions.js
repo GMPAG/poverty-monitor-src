@@ -9,23 +9,7 @@ ROW_KEY_COLUMN_NAME = 'varname';
 NAME_ROW_KEY = 'Indicator';
 SECTION_ROW_KEY = 'Position in the list of indicators';
 DESCRIPTION_ROW_KEY = 'What is this indicator?';
-
-// A HACK to get sections in the order that Ruth Lupton wants them.
-// Replace this with some kind of ordering metadata in the canonical
-// spreadsheet.
-// TO DO: Indicator metadata now includes a DISPLAY_ORDER. Switch to using this.
-// TO DO: Indicator metadata now includes a DISPLAY_ORDER. Switch to using this.
-// TO DO: Indicator metadata now includes a DISPLAY_ORDER. Switch to using this.
-// TO DO: Indicator metadata now includes a DISPLAY_ORDER. Switch to using this.
-HACK_SECTION_ORDER = [
-    'Indices of Multiple Deprivation (IMD)',
-    'Child Poverty',
-    'Unemployment',
-    'Claims for Other Out of Work Benefits',
-    'Claims for In-Work Benefits',
-    'Housing Unaffordability',
-    'Other Indicators'
-];
+ORDER_ROW_KEY = 'DISPLAY_ORDER';
 
 // HACK: The IMD is a special case because severity / numerical value are
 // inversely related and it is not available at a local authority level.
@@ -47,61 +31,49 @@ if ( ! console ) {
 
 
 function inflatePage( indicator_metadata ) {
-//     console.debug( indicator_metadata );
 
-    var row_keys = indicator_metadata.column( ROW_KEY_COLUMN_NAME );
-    var value = function(column, row_key) {
-        return column[row_keys.indexOf(row_key)];
+    // Helper fn: Get a metadata value from indicator_key and row_key.
+    var value = function(indicator_key, row_key) {
+        var row_keys = indicator_metadata.column( ROW_KEY_COLUMN_NAME );
+        return indicator_metadata.column(indicator_key)[row_keys.indexOf(row_key)];
     }
-    var summary = function(key, col) {
+
+    // Helper fn: Get an indicator summary from the indicator's key.
+    var indicatorSummary = function(indicator_key) {
         var result = {
-            key: key,
-            name: value(col,NAME_ROW_KEY),
-            description: value(col,DESCRIPTION_ROW_KEY)
+            key: indicator_key,
+            name: value(indicator_key,NAME_ROW_KEY),
+            description: value(indicator_key,DESCRIPTION_ROW_KEY),
+            sectionName: value(indicator_key,SECTION_ROW_KEY),
+            displayOrder: parseInt(value(indicator_key,ORDER_ROW_KEY), 10)
         }
 //         console.debug( result );
         return result;
     }
 
-    // Build the shallow tree of sections and summary data.
-    var summaries = {}
-    indicator_metadata.userDefinedColumnNames().forEach( function(key) {
-
-        if ( key == ROW_KEY_COLUMN_NAME ) {
-            return;
-        }
-
-        var col = indicator_metadata.column(key);
-        if ( ! col ) {
-            console.error( "Failed to retrieve column " + key );
-            return;
-        }
-
-        var section = value(col,SECTION_ROW_KEY);
-
-        if ( section == '' ) {
-            var name = value(col,NAME_ROW_KEY);
-            summaries[name] = summary(key,col);
-        } else {
-            if ( ! summaries.hasOwnProperty(section) ) {
-                summaries[section] = [];
+    // Helper fn
+    var findSectionByName = function(sections,section_name) {
+        for ( var i=0; i<sections.length; i++) {
+            if ( sections[i].name == section_name ) {
+                return sections[i];
             }
-            summaries[section].push( summary(key, col) );
         }
-    });
+        return null;
+    }
 
-    // Append a section to the list of sections.
-    var addSection = function(name) {
+    // Helper fn: Append markup for a new section.
+    var addSectionMarkup = function(section_name) {
         jQuery( '#all-descriptions  > ul' ).append(
             jQuery( '<li>' ).append(
-                jQuery( '<h2>' ).text( name ),
+                jQuery( '<h2>' ).text( section_name ),
                 jQuery( '<ul>' )
             )
         );
     }
 
-    // Append a summary to the final section.
-    var addSummary = function(summary, with_title) {
+    // Helper fn: Append markup for a new indicator-summary, to the most
+    //            recently added section.
+    var addIndicatorSummaryMarkup = function(summary, with_title) {
 
         jQuery( '#all-descriptions > ul > li > ul' ).last().append(
             jQuery('<li>')
@@ -138,68 +110,48 @@ function inflatePage( indicator_metadata ) {
         );
     }
 
+    // Get the list of indicators in display order.
+    var indicators = indicator_metadata.userDefinedColumnNames()
+    .filter( function(key) { return key != ROW_KEY_COLUMN_NAME; } )
+    .map( function(key) { return indicatorSummary(key); } )
+    .sort( function(a,b) { return a.displayOrder - b.displayOrder; } )
+    ;
+//     console.debug(indicators);
 
-    // Are the section names the ones that we already know about?
-    // (See the CONSTANTS block at the top of this file.)
-    var section_names = Object.keys(summaries);
-
-    function arrayContentsAreIdentical( a1, a2 ) {
-
-        if ( a1.length != a2.length ) {
-            return false;
+    // Derive the list of sections from the list of indicators.
+    var sections = indicators.reduce( function(result,indicator) {
+        var section_name = indicator.sectionName || indicator.name;
+        var section = findSectionByName(result, section_name);
+        if ( section ) {
+            section.indicators.push(indicator);
+        } else {
+            result.push( {name:section_name,indicators:[indicator]} );
         }
+        return result;
+    }, [] );
+//     console.debug(sections);
 
-        // Make sure that none of the values in a1 are missing from a2.
-        // ASSUMPTION: No value will occur multiple times in either array.
-        var isMissingSection = a1.some( function( a1val ) {
-            return ( -1 == a2.indexOf(a1val) );
-        });
 
-        return ! isMissingSection;
-    }
-
-    if ( arrayContentsAreIdentical( section_names, HACK_SECTION_ORDER ) ) {
-        // Only the section names we are already aware of are present, so use
-        // our HACKED in order for sections.
-        section_names = HACK_SECTION_ORDER;
-    } else {
-        console.warn(
-            'The section names as defined by row key "' + SECTION_ROW_KEY +
-            '" have changed, so we are not imposing any kind of order on the sections.'
-            + 'This is probably not what you want.' );
-        console.warn( [section_names, HACK_SECTION_ORDER ] );
-    }
-
-    // Start the markup for the summary list.
+    // Add the markup for the outermost list. (The section list.)
     jQuery( '#all-descriptions' ).append( jQuery( '<ul>' ) );
 
-    section_names.forEach( function ( section_name ) {
+    // Add the markup for each section and its list of indicators.
+    sections.forEach( function ( section ) {
 
-        addSection( section_name );
+        var summary_titles_required =
+            section.indicators.length > 1 ||
+            section.name != section.indicators[0].name
 
-        var section = summaries[section_name];
-        if ( Array.isArray( section ) ){
-            section.forEach( function( summary ) { addSummary( summary, true ); } );
-        } else {
-            addSummary( section, false );
-        }
+        addSectionMarkup( section.name );
+        section.indicators.forEach( function( summary ) {
+            addIndicatorSummaryMarkup( summary, summary_titles_required );
+        } );
     });
-
-    //         indicator_metadata.forEach( function ( name, index ) {
-    //             var summary = descriptions[1].data[index];
-    //             var short_label =
-    //                 la_data.getColumnByProperty( 'descriptionPageTitle', name ).shortLabel;
-    //         } );
-    //     }
-    //     else {
-    //         jQuery( '#all-descriptions' ).append(
-    //             jQuery( '<p>' ).text(
-    //                 'We are sorry. Something went wrong. We were unable to load the descriptions of the poverty index indicators.'
-    //             )
-    //         );
-    //     }
-
 }
+
+
+
+
 
 // ...and go!
 loadCartoDbDataset( 'indicator_metadata_2016_04_05', inflatePage );
