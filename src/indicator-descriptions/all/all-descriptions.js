@@ -13,6 +13,10 @@ DESCRIPTION_ROW_KEY = 'What is this indicator?';
 // A HACK to get sections in the order that Ruth Lupton wants them.
 // Replace this with some kind of ordering metadata in the canonical
 // spreadsheet.
+// TO DO: Indicator metadata now includes a DISPLAY_ORDER. Switch to using this.
+// TO DO: Indicator metadata now includes a DISPLAY_ORDER. Switch to using this.
+// TO DO: Indicator metadata now includes a DISPLAY_ORDER. Switch to using this.
+// TO DO: Indicator metadata now includes a DISPLAY_ORDER. Switch to using this.
 HACK_SECTION_ORDER = [
     'Indices of Multiple Deprivation (IMD)',
     'Child Poverty',

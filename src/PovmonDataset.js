@@ -19,6 +19,7 @@ var GEO_NAME_COLUMN_NAME = 'geo_name';
 var INDICATOR_NAME_ROW_KEY = "Indicator";
 var ITERATION_NAME_ROW_KEY = "VARLABEL";
 var ITERATION_FOR_DISPLAY_ROW_KEY = "DISPLAY_ON_POVMON";
+var INDICATOR_ORDER_ROW_KEY = "DISPLAY_ORDER";
 
 //
 ////////////
@@ -138,7 +139,7 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
 
             // Do we have the correct number of key fragments?
             if ( frags.length == 2 ) {
-                var result = { "keyRoot": frags[0], "iterationId": parseInt(frags[1]) };
+                var result = { "keyRoot": frags[0], "iterationId": parseInt(frags[1],10) };
 
                 // ASSUMPTION: Iteration ID Must be a finite number.
                 if ( isFinite(frags.iterationId) ) {
@@ -235,11 +236,15 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
             function(key) {
                 return {
                     key:key,
-                    name:indicatorProperty(key,INDICATOR_NAME_ROW_KEY)
+                    name:indicatorProperty(key,INDICATOR_NAME_ROW_KEY),
+                    displayOrder:parseInt(
+                        indicatorProperty(key,INDICATOR_ORDER_ROW_KEY), 10)
                 };
             }
+        ).sort(
+            function(a,b) { return a.displayOrder - b.displayOrder; }
         );
-//         console.debug(result);
+//          console.debug(result);
         return result;
     }
 
