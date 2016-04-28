@@ -262,6 +262,10 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
         var keys_for_display =
             displayableIterationKeys( indicator_key, detail_level );
 
+        if ( ! keys_for_display ) {
+            return null;
+        }
+
         var result = {};
         result.iterations = keys_for_display.map( function(iteration_key) {
 

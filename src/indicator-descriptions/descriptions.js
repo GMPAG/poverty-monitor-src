@@ -10,6 +10,10 @@ ROW_KEY_COLUMN_NAME = 'varname';
 SECTION_ROW_KEY = 'Position in the list of indicators';
 INDICATOR_NAME_ROW_KEY = 'Indicator'
 
+// HACK: The IMD is a special case because severity / numerical value are
+// inversely related and it is not available at a local authority level.
+HACK_IMD_NAME = 'Indices of Multiple Deprivation (IMD)';
+
 //
 ////////////
 
@@ -24,23 +28,8 @@ if ( ! console ) {
 }
 
 
-
-function getParameterFromQueryString(name) {
-  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-      // Lines above are for JS file. Lines below are for ruby string.
-      //         name = name.replace(/[\[]/, "\\\\[").replace(/[\]]/, "\\\\]");
-      //         var regex = new RegExp("[\\\\?&]" + name + "=([^&#]*)"),
-      results = regex.exec(location.search);
-  return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-}
-
-
-
-
-var indicator_name = getParameterFromQueryString( 'name' );
-
 function inflatePage( indicator_metadata ) {
+    var indicator_name = getParameterFromQueryString( 'name' );
     var column_names = indicator_metadata.userDefinedColumnNames();
 
     // Get the descriptions text for the current indicator from the appropriate
@@ -87,7 +76,19 @@ function inflatePage( indicator_metadata ) {
             }
         }
     });
+
+    // Modify the link to the indicator visualisation.
+    jQuery( '#indicator-details > .links a' ).each( function () {
+        var detail_level =
+            indicator_name == HACK_IMD_NAME ? 'lsoa' : 'local-authority';
+        jQuery(this).attr( 'href',
+                          jQuery(this).attr('href')
+                          + '?measure=' + encodeURIComponent( indicator_name )
+                          + '&level=' + encodeURIComponent( detail_level )
+        );
+    });
 }
+
 
 // ...and go:
 loadCartoDbDataset( 'indicator_metadata_2016_04_05', inflatePage );

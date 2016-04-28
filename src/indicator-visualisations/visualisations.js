@@ -330,7 +330,7 @@ function updateLinksForIndicator( indicator )
             href = href.slice( 0, indicator_index );
         }
 
-        jQuery(this).attr('href', href + '&measure=' + indicator.title);
+        jQuery(this).attr('href', href + '&measure=' + encodeURIComponent(indicator.title) );
     });
 }
 
