@@ -1,5 +1,7 @@
-// all-descriptions.js
-// Show a summary of all indicators on a single page.
+//////////////////////////////////////////////////////////////////////////////
+// Show a summary of all available poverty monitor indicators.
+//////////////////////////////////////////////////////////////////////////////
+
 
 // CONSTANTS
 //
@@ -17,17 +19,6 @@ HACK_IMD_NAME = 'Indices of Multiple Deprivation (IMD)';
 
 //
 ////////////
-
-
-// Not all platforms implement a javascript console.
-if ( ! console ) {
-    console = {
-        debug:function(){},
-        warn:function(){},
-        error:function(){}
-    };
-}
-
 
 
 function inflatePage( indicator_metadata ) {

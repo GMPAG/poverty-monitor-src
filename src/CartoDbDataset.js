@@ -1,18 +1,16 @@
-// CartoDbDataset wraps the parsed json object returned by the CartoDB API to
-// represent a CartoDB dataset. The CartoDbDataset may optionally be
-// expanded with extra metadata that applies to individual columns in the
-// dataset. The metadata source is another CartoDB dataset.
+//////////////////////////////////////////////////////////////////////////////
 //
-// Param raw_table is the table that will be wrapped.
+// CartoDbDataset wraps the parsed json object (param raw_table) returned by
+// the CartoDB API to represent a CartoDB dataset.
 //
-// There are two optional paramaters. If one is present then both are required:
+// Edit: Commented out the following feature pending demonstrable need:
+//     The CartoDbDataset may optionally be expanded with extra
+//     metadata that applies to individual columns in the dataset.
+//     The metadata source is another CartoDB dataset.
 //
-// Optional param raw_columns_metadata_table is the extra metadata that
-// applies to individual columns in the data table.
-//
-// Optional param metadata_property_names_column_name is the name of the column
-// in the metadata table that contains the metadata property names.
-//
+//////////////////////////////////////////////////////////////////////////////
+
+
 function CartoDbDataset( raw_table ) {
 
     /////// Private ///////
@@ -139,6 +137,7 @@ function CartoDbDataset( raw_table ) {
 }
 
 
+//////////////////////////////////////////////////////////////////////////////
 // Load a given CartoDB dataset.
 //
 // Param dataset_name is the dataset identifier required by the CartoDB API.

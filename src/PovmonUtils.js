@@ -1,3 +1,8 @@
+//////////////////////////////////////////////////////////////////////////////
+// A set of utilities common to all poverty monitor JS files.
+//////////////////////////////////////////////////////////////////////////////
+
+
 // Convert plain text to html including paragraph structure.
 // Stole this from somewhere. Probably StackOverflow.
 function paragraphise(s) {
@@ -34,4 +39,16 @@ function getParameterFromQueryString(name) {
         results = regex.exec(location.search);
     return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
+
+
+// Not all platforms implement a javascript console. Don't break them.
+if ( ! console ) {
+    console = {
+        debug:function(){},
+        warn:function(){},
+        error:function(){}
+    };
+}
+
+
 

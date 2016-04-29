@@ -1,7 +1,9 @@
-// descriptions.js
-// Show the description of a single poverty indicator.
+//////////////////////////////////////////////////////////////////////////////
+// Show the description of a single poverty monitor indicator.
+//////////////////////////////////////////////////////////////////////////////
 
 
+//////////////////////////////////////////////////////////////////////////////
 // CONSTANTS
 //
 
@@ -15,17 +17,7 @@ INDICATOR_NAME_ROW_KEY = 'Indicator'
 HACK_IMD_NAME = 'Indices of Multiple Deprivation (IMD)';
 
 //
-////////////
-
-
-// Not all platforms implement a javascript console.
-if ( ! console ) {
-    console = {
-        debug:function(){},
-        warn:function(){},
-        error:function(){}
-    };
-}
+//////////////////////////////////////////////////////////////////////////////
 
 
 function inflatePage( indicator_metadata ) {
