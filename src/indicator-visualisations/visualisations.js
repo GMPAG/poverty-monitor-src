@@ -1,25 +1,21 @@
+//////////////////////////////////////////////////////////////////////////////
+// Show a set of visualisations for a poverty monitor indicator.
+// Allow the user to change the indicator being viewed.
+//////////////////////////////////////////////////////////////////////////////
+
+
 // HACK: The IMD is a special case because severity / numerical value are
 // inversely related and it is not available at a local authority level.
 HACK_IMD_TITLE = 'Indices of Multiple Deprivation (IMD)';
 
 var povmon_dataset = null;
+var detail_level = '';
 
 var chart = null;
 var map = null;
 var table = null;
 
-var x_axis_name = 'geo_name';
 
-var detail_level = '';
-
-// Not all platforms implement a javascript console.
-if ( ! console ) {
-    console = {
-        debug:function(){},
-        warn:function(){},
-        error:function(){}
-    };
-}
 
 function recreateChart( indicator )
 {
@@ -228,9 +224,12 @@ line-opacity: 1;   \n\
 \n"
 
 if ( show_labels ) {
+    // The name of the cartodb dataset column that contains the location name.
+    var area_name = 'geo_name';
+
     result +=
         "#localauthoritymultiindicator_withboundaries::labels {   \n\
-text-name: [" + x_axis_name + "];   \n\
+text-name: [" + area_name + "];   \n\
 text-face-name: 'DejaVu Sans Book';   \n\
 text-size: 14;   \n\
 text-label-position-tolerance: 10;   \n\
