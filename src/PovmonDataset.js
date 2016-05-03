@@ -26,6 +26,7 @@ var INDICATOR_NAME_ROW_KEY = "Indicator";
 var ITERATION_NAME_ROW_KEY = "VARLABEL";
 var ITERATION_FOR_DISPLAY_ROW_KEY = "DISPLAY_ON_POVMON";
 var INDICATOR_ORDER_ROW_KEY = "DISPLAY_ORDER";
+var DATE_LABEL_ROW_KEY = "DATE_LABEL";
 
 //
 //////////////////////////////////////////////////////////////////////////////
@@ -296,6 +297,8 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
             iteration.key = iteration_key;
             iteration.title =
                 iterationProperty(iteration_key, ITERATION_NAME_ROW_KEY) || "";
+            iteration.dateLabel =
+                iterationProperty( iteration_key, DATE_LABEL_ROW_KEY) || "???";
 
             iteration.unitsLabel = iterationProperty(
                 iteration_key, "MEASUREUNIT_SYMBOL_"+detail_level.toUpperCase()) || "";
@@ -326,6 +329,9 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
 
         result.visualisationIntroText = indicatorProperty(
             indicator_key, "VIS_PAGE_INTRO_"+detail_level.toUpperCase()) || "";
+
+        result.chartComment =
+            indicatorProperty(indicator_key, "CHART_COMMENT_"+detail_level.toUpperCase());
 
         result.chartYAxisLabel =
             indicatorProperty(indicator_key, "Y_AXIS_LABEL_"+detail_level.toUpperCase());

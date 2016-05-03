@@ -29,22 +29,22 @@ function recreateChart( indicator )
     var x_axis_title = 'Local authority';
     var chart_detail_level = DetailLevel.LA;
 
-
+    // Helper fn: Check title for uniqueness and fix if necessary.
     var HACK_SUFFIX = 1;
     var HACK_TITLES = [];
-    var columns = indicator.iterations.map( function(iteration) {
-        var title = iteration.title;
-
-        // Identical data titles will break the chart.
-        // Make sure there are no identical data titles.
-        if ( -1 != HACK_TITLES.indexOf(title) ) {
+    var getUniqueTitle = function(title) {
+        if ( HACK_TITLES.indexOf(title) >= 0 ) {
             // ASSUMPTION: Adding an integer to the title will be enough to
             //             make it unique.
             title += ' '+HACK_SUFFIX;
             HACK_SUFFIX++;
         }
         HACK_TITLES.push(title);
+        return title;
+    };
 
+    var columns = indicator.iterations.map( function(iteration) {
+        var title = getUniqueTitle(iteration.dateLabel);
         return [ title ].concat( iteration.values );
     });
     columns.unshift( [ x_axis_id ].concat( indicator.iterations[0].geoNames ));
@@ -154,7 +154,7 @@ They may be based on different goegraphical areas.</p>" );
 
     config.columns = indicator.iterations.map( function(iteration) {
         return {
-            title : iteration.title,
+            title : indicator.chartYAxisLabel +"<br />"+ iteration.dateLabel,
             // Data may contain strings that describe missing data points.
             // Force sorting to work for numbers rather than words.
             type : "num"
@@ -348,6 +348,11 @@ function selectIndicator( indicator )
             + encodeURIComponent(indicator.title)
             + '">About this indicator</a>" page.</p>'  );
 
+    jQuery( '#graph-comment' ).empty();
+    if ( indicator.chartComment ) {
+        jQuery( '#graph-comment' ).append( paragraphise(indicator.chartComment) );
+    }
+
     updateSelectorForIndicator( indicator );
     updateMapForIndicator( indicator );
     updateLinksForIndicator( indicator );
@@ -506,5 +511,3 @@ switch ( getParameterFromQueryString( 'level' ) )
         jQuery('#wrap .links').remove();
         jQuery('#page-title' ).text( 'Indicator level not found' );
 }
-
-

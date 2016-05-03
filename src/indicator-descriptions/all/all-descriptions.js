@@ -13,9 +13,9 @@ SECTION_ROW_KEY = 'Position in the list of indicators';
 DESCRIPTION_ROW_KEY = 'What is this indicator?';
 ORDER_ROW_KEY = 'DISPLAY_ORDER';
 
-// HACK: The IMD is a special case because severity / numerical value are
-// inversely related and it is not available at a local authority level.
-HACK_IMD_NAME = 'Indices of Multiple Deprivation (IMD)';
+// HACK: IMD and child poverty are special cases for link generation.
+HACK_IMD_KEY = 'imd_rank';           // only available at lsoa
+HACK_CHILD_POVERTY_KEY = 'mpg_2';    // only available at ward
 
 //
 ////////////
@@ -76,8 +76,15 @@ function inflatePage( indicator_metadata ) {
             );
         }
 
-        var detail_level =
-            summary.name == HACK_IMD_NAME ? 'lsoa' : 'local-authority';
+        var vis_href;
+        if ( summary.key == HACK_CHILD_POVERTY_KEY ) {
+            vis_href = '/poverty-monitor/child-poverty';
+        } else {
+            var detail_level =
+                summary.key == HACK_IMD_KEY ? 'lsoa' : 'local-authority';
+            vis_href = '/poverty-monitor/indicator-visualisations/?level='
+            + detail_level + '&measure=' + encodeURIComponent(summary.name);
+        }
 
         jQuery( '#all-descriptions > ul > li > ul > li' ).last().append(
             jQuery( '<p>' ).text( summary.description ),
@@ -91,10 +98,7 @@ function inflatePage( indicator_metadata ) {
                         ).text( 'About this indicator' )
                     ),
                     jQuery( '<li>' ).append(
-                        jQuery(
-                            '<a href="/poverty-monitor/indicator-visualisations/?level='
-                            + detail_level + '&measure=' + encodeURIComponent(summary.name) + '">'
-                        ).text( 'What the data shows' )
+                        jQuery( '<a href="' + vis_href + '">' ).text( 'What the data shows' )
                     )
                 )
             )
@@ -139,9 +143,6 @@ function inflatePage( indicator_metadata ) {
         } );
     });
 }
-
-
-
 
 
 // ...and go!
