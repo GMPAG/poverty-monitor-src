@@ -153,8 +153,15 @@ They may be based on different goegraphical areas.</p>" );
     } );
 
     config.columns = indicator.iterations.map( function(iteration) {
+        var title;
+        if ( indicator.chartYAxisLabel ) {
+            title = indicator.chartYAxisLabel +"<br />"+ iteration.dateLabel;
+        } else {
+            title = indicator.title + "<br />" + iteration.unitsLabel +", "+iteration.dateLabel;
+        }
+
         return {
-            title : indicator.chartYAxisLabel +"<br />"+ iteration.dateLabel,
+            title : title,
             // Data may contain strings that describe missing data points.
             // Force sorting to work for numbers rather than words.
             type : "num"
@@ -406,8 +413,24 @@ function setInitialIndicator() {
 
 function createSelector( dataset )
 {
+    var prev_indicator = null;
+
     dataset.availableIndicators(detail_level).forEach(
         function (indicator) {
+            var prefix_with_divider = prev_indicator && (
+                !indicator.section || indicator.section != prev_indicator.section
+            );
+            console.debug( {doit:prefix_with_divider, prev:prev_indicator, cur:indicator} );
+
+            if ( prefix_with_divider ) {
+                jQuery( '#measure-selector ul' )
+                .append(
+                    jQuery('<li>')
+                    .addClass('divider')
+                    .attr( 'role', 'presentation' )
+                );
+            }
+
             jQuery( '#measure-selector ul' )
             .append(
                 jQuery('<li>')
@@ -417,6 +440,8 @@ function createSelector( dataset )
                     jQuery( '<a>' + indicator.name + '</a>' )
                 )
             );
+
+            prev_indicator = indicator;
         }
     );
 }

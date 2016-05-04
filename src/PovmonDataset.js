@@ -23,10 +23,12 @@ var GEO_CODE_COLUMN_NAME = 'geo_code';
 var GEO_NAME_COLUMN_NAME = 'geo_name';
 
 var INDICATOR_NAME_ROW_KEY = "Indicator";
+var INDICATOR_SECTION_ROW_KEY = "Position in the list of indicators";
+var INDICATOR_ORDER_ROW_KEY = "DISPLAY_ORDER";
+
 var ITERATION_NAME_ROW_KEY = "VARLABEL";
 var ITERATION_FOR_DISPLAY_ROW_KEY = "DISPLAY_ON_POVMON";
-var INDICATOR_ORDER_ROW_KEY = "DISPLAY_ORDER";
-var DATE_LABEL_ROW_KEY = "DATE_LABEL";
+var ITERATION_DATE_LABEL_ROW_KEY = "DATE_LABEL";
 
 //
 //////////////////////////////////////////////////////////////////////////////
@@ -244,6 +246,7 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
                 return {
                     key:key,
                     name:indicatorProperty(key,INDICATOR_NAME_ROW_KEY),
+                    section:indicatorProperty(key,INDICATOR_SECTION_ROW_KEY),
                     displayOrder:parseInt(
                         indicatorProperty(key,INDICATOR_ORDER_ROW_KEY), 10)
                 };
@@ -298,7 +301,7 @@ function PovmonDataset( datasets, indicator_metadata, iteration_metadata ) {
             iteration.title =
                 iterationProperty(iteration_key, ITERATION_NAME_ROW_KEY) || "";
             iteration.dateLabel =
-                iterationProperty( iteration_key, DATE_LABEL_ROW_KEY) || "???";
+                iterationProperty( iteration_key, ITERATION_DATE_LABEL_ROW_KEY) || "???";
 
             iteration.unitsLabel = iterationProperty(
                 iteration_key, "MEASUREUNIT_SYMBOL_"+detail_level.toUpperCase()) || "";
