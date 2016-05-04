@@ -373,6 +373,9 @@ function selectIndicator( indicator )
 
 function onMeasureClicked(e)
 {
+    // Hide any user messages that arose from a previous user action.
+    jQuery('#user-messages').css("display", "none");
+
     selectIndicator(
         povmon_dataset.indicator(
             jQuery(e.currentTarget).attr('measure'), detail_level ) );
